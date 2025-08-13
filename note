@@ -1,0 +1,31 @@
+Persistent AI State & Why No External AI Libraries Are Needed
+
+Persistent AI State:
+
+    By default, the Terminator’s AI resets whenever the game or server shuts down because all in-memory Lua variables are lost.
+
+    To make the AI truly persistent across sessions, you can:
+
+        Serialize AI state: Save the Terminator’s key variables (location, inventory, aggression level, traps placed, escalation state) into a Lua table.
+
+        Store in save files: Use Project Zomboid’s ModData or similar save hooks to write the AI state to the world’s save data.
+
+        Restore on load: When the player or server starts, read the saved state and restore all AI variables so the Terminator continues where it left off.
+
+This ensures the AI behaves continuously and maintains its agentic nature, creating a consistent and tense gameplay experience even after server restarts or single-player reloads.
+
+Why No External AI Libraries Are Needed:
+
+    The Terminator’s AI is rule-based and deterministic, not a trained model.
+
+    All behaviors—hunting, ambushes, resource management, escalation—are implemented with:
+
+        Lua state machines
+
+        Conditional logic
+
+        Probability tables for variability
+
+    There is no learning or gradient-based optimization, so frameworks like PyTorch or TensorFlow are unnecessary.
+
+    This keeps the mod lightweight, fully offline, and compatible with both single-player and server multiplayer.
