@@ -1,3 +1,5 @@
+local Planner = {}
+
 local function deepcopy(orig)
     if type(orig) ~= "table" then return orig end
     local copy = {}
@@ -16,7 +18,6 @@ local function heuristic(state, goal)
 end
 
 local function stateHash(state)
-    -- simple deterministic serialization for primitive-valued state tables
     local keys = {}
     for k in pairs(state) do table.insert(keys, tostring(k)) end
     table.sort(keys)
@@ -47,22 +48,27 @@ local function isApplicable(action, state)
     return true
 end
 
-function goap_plan(StartState, actions, goal)
+function Planner.goap_plan(StartState, actions, goal, opts)
+    opts = opts or {}
+    local verbose = opts.verbose
+
     local open = {
         { state = deepcopy(StartState), plan = {}, g = 0, h = heuristic(StartState, goal) }
     }
     local closed = {}
+    local expansions = 0
 
     while #open > 0 do
         table.sort(open, function(a,b) return (a.g + a.h) < (b.g + b.h) end)
         local node = table.remove(open, 1)
+        expansions = expansions + 1
 
         local nodeHash = stateHash(node.state)
         if isGoalSatisfied(node.state, goal) then
+            if verbose then print("[Planner] goal satisfied, plan length:", #node.plan, "cost:", node.g, "expansions:", expansions) end
             return node.plan
         end
 
-        -- record best g for this state to avoid re-expansion
         if closed[nodeHash] and closed[nodeHash] <= node.g then
             -- already found a better or equal path
         else
@@ -73,7 +79,6 @@ function goap_plan(StartState, actions, goal)
                     local newState = deepcopy(node.state)
                     if action.effects then
                         for k,v in pairs(action.effects) do
-                            -- effect can be function or direct assignment
                             if type(v) == "function" then
                                 newState[k] = v(newState)
                             else
@@ -102,5 +107,13 @@ function goap_plan(StartState, actions, goal)
         end
     end
 
+    if opts.verbose then print("[Planner] no plan found after expansions:", expansions) end
     return nil
 end
+
+Planner.deepcopy = deepcopy
+Planner.heuristic = heuristic
+Planner.isGoalSatisfied = isGoalSatisfied
+Planner.stateHash = stateHash
+
+return Planner
