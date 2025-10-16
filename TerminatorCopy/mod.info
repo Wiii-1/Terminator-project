@@ -1,10 +1,11 @@
 name=Terminator (Legacy)
 poster=poster.png
 id=TerminatorLegacy
-description=<H1><GREEN>Terminator LEGACY V1 B41
+description=<H1><GREEN>Terminator, GOAP-based Terminator AI
 description=<BR>
 description=During the zombie apocalypse, 
 description= not zombies, not people but the android is coming for you
 description=<BR>
-description=<RED>V1 UNMAINTAINED / UNSUPPORTED VERSION ONLY TO SERVER AS AN ENGINE FOR LEGACY DAY ONE / WEEK ONE
+author: Mariano, Wesley & Dela Cruz, Aaron Neil
+VERSION: 1.0
 

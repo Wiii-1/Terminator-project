@@ -4,7 +4,7 @@ local CraftWeapons = {
     effects         = { craftedWeapon = true, storedWeapon = true, hasWeapon = true },
     cost            = 5,
     perform         = function(self, agent, world)
-        -- stub: craft if materials present
+        -- craft if materials present
         if world and world.hasMaterial then
             agent.state.hasWeapon = true
             agent.state.craftedWeapon = true
