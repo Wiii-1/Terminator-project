@@ -1,12 +1,8 @@
-local TerminatorPathfinding = require "server/TerminatorPathfinding"
 
 local MoveToLocation = {
     name = "MoveToLocation",
     preconditions = { playerSeen = true },
-    effects = {
-        followingPlayer = true,
-        location = function(state) return state and state.playerPosition or nil end
-    },
+    effects = { followingPlayer = true },
     cost = 1,
     perform = function(self, agent, world)
         if not world or not world.playerPosition then
@@ -14,32 +10,32 @@ local MoveToLocation = {
             return false
         end
 
-        if not agent.navigationGraph then
-            agent:buildNavigationGraph()
-        end
-
-        local startX, startY, startZ = agent.state.x or 0, agent.state.y or 0, agent.state.z or 0
-        local endX, endY, endZ = world.playerPosition.x, world.playerPosition.y, world.playerPosition.z or 0
-
-        local startNode = string.format("%d,%d,%d", startX, startY, startZ)
-        local endNode = string.format("%d,%d,%d", endX, endY, endZ)
-
-        local path = TerminatorPathfinding.TerminatorPathfinding(agent.navigationGraph, startNode, endNode)
-        if not path then
-            print("[Action] MoveToLocation failed: no path found")
+        local npc = agent.character
+        if not npc then
             return false
         end
 
-        local nextStep = path[2] or path[1]
-        if nextStep then
-            local x, y, z = nextStep:match("(%d+),(%d+),(%d+)")
-            agent.state.x = tonumber(x)
-            agent.state.y = tonumber(y)
-            agent.state.z = tonumber(z)
-            print(string.format("[Action] Moved to %d,%d,%d", agent.state.x, agent.state.y, agent.state.z))
-            return true
+        local playerX = world.playerPosition.x
+        local playerY = world.playerPosition.y
+        
+        local npcX = npc:getX()
+        local npcY = npc:getY()
+
+        local dx = playerX - npcX
+        local dy = playerY - npcY
+        local distance = math.sqrt(dx*dx + dy*dy)
+
+        if distance < 2 then
+            return true  -- Close enough
         end
-        return false
+
+        dx = (dx / distance)
+        dy = (dy / distance)
+
+        npc:setX(npcX + dx)
+        npc:setY(npcY + dy)
+
+        return true
     end
 }
 
