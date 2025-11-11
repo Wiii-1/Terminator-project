@@ -1,13 +1,13 @@
-local Planner            = require"TerminatorPlanner"
-local WorldState         = require"WorldState"
-local BuildGraphFromMap  = require"TerminatorPathGraph"
-local HuntPlayer         = require"actions/HuntPlayer"
-local GatherWeapon       = require"actions/GatherWeapon"
-local CraftWeapons       = require"actions/CraftWeapons"
-local StalkPlayer        = require"actions/StalkPlayer"
-local SabotagePlayerBase = require"actions/SabotagePlayerBase"
-local AssassinatePlayer  = require"actions/AssassinatePlayer"
-local MoveToLocation     = require"actions/MoveToLocation" 
+local Planner            = require"server.TerminatorPlanner"
+local WorldState         = require"shared.WorldState"
+local BuildGraphFromMap  = require"server.TerminatorPathGraph"
+local HuntPlayer         = require"server.actions.HuntPlayer"
+local GatherWeapon       = require"server.actions.GatherWeapon"
+local CraftWeapons       = require"server.actions.CraftWeapons"
+local StalkPlayer        = require"server.actions.StalkPlayer"
+local SabotagePlayerBase = require"server.actions.SabotagePlayerBase"
+local AssassinatePlayer  = require"server.actions.AssassinatePlayer"
+local MoveToLocation     = require"server.actions.MoveToLocation"
 
 local TerminatorAgent = {
     name        = "The Terminator",
@@ -100,6 +100,29 @@ local TerminatorAgent = {
             table.remove(self.plan, 1)
             if #self.plan == 0 and Planner.isGoalSatisfied(self.state, self.currentGoal) then
                 print("[Agent] goal satisfied")
+            end
+
+            -- Optional: called by a manager on ticks to perform sensing/planning/execution
+            function TerminatorAgent.tick(self)
+                -- minimal world sensing; can be expanded to use real world queries
+                local world = {
+                    playerSeen = false,
+                    playerNearBy = false,
+                    hasWeapon = self.state.hasWeapon
+                }
+
+                -- update internal perception
+                self:sense(world)
+
+                -- if no plan, attempt to create one from template initialGoals
+                if (not self.plan or #self.plan == 0) and self.template and self.template.initialGoals then
+                    self:planActions(self.template.initialGoals, { verbose = false })
+                end
+
+                -- execute one step of the plan
+                if self.plan and #self.plan > 0 then
+                    self:executePlan(world)
+                end
             end
         else
             print("[Agent] action failed, replanning")
