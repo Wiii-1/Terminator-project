@@ -189,6 +189,10 @@ function PZNS_GeneralAI.PZNS_CheckForThreats(npcSurvivor)
         end
     end
     -- Zombies list
+    -- Ensure we have a current zombie list; update on-demand if missing
+    if (PZNS_CellZombiesList == nil and PZNS_WorldUtils and PZNS_WorldUtils.PZNS_UpdateCellZombiesList) then
+        pcall(function() PZNS_WorldUtils.PZNS_UpdateCellZombiesList() end)
+    end
     if (PZNS_CellZombiesList ~= nil) then
         for i = PZNS_CellZombiesList:size() - 1, 0, -1 do
             local zombie = PZNS_CellZombiesList:get(i);

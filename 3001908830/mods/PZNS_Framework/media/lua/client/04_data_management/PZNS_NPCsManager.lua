@@ -332,6 +332,10 @@ function PZNS_NPCsManager.SpawnTerminator(x, y, z)
     terminator.isTerminator = true
     terminator.goapPlan = nil
     terminator.canSaveData = false
+    -- Make Terminator hostile to the player (affection 0 => hostile)
+    terminator.affection = 0
+    terminator.isRaider = true
+    terminator.groupID = nil
     -- Mark modData so server spawners / other systems know this NPC is managed by PZNS
     if terminator.npcIsoPlayerObject and terminator.npcIsoPlayerObject.getModData then
         local ok, md = pcall(function() return terminator.npcIsoPlayerObject:getModData() end)

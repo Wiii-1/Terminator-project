@@ -23,6 +23,7 @@ ContextMenu_EN = {
 		ContextMenu_PZNS_Remove_Dead_Bodies = "Remove Non-Zombie Dead Bodies",
 		ContextMenu_PZNS_ReSpawn_Chris_Tester = "(Re)Spawn Chris Tester",
 		ContextMenu_PZNS_ReSpawn_Jill_Tester = "(Re)Spawn Jill Tester",
+		ContextMenu_PZNS_ReSpawn_Terminator_Tester = "(Re)Spawn Terminator Tester",
 		ContextMenu_PZNS_Spawn_Zombie = "Spawn a Zombie",
 		ContextMenu_PZNS_Spawn_Raider = "Spawn a Raider",
 		ContextMenu_PZNS_Spawn_Survivor = "Spawn a Survivor",
@@ -34,6 +35,7 @@ ContextMenu_EN = {
 		ContextMenu_PZNS_PZNS_Debug_WipeData = "PZNS Wipe Data",
 
 		ContextMenu_PZNS_PZNS_Invite = "Invite NPC",
+		ContextMenu_PZNS_Terminator = "Terminator",
 		ContextMenu_PZNS_PZNS_Jobs = "NPC Job",
 		ContextMenu_PZNS_PZNS_NPC_Info = "NPC Info",
 		ContextMenu_PZNS_PZNS_Inventory = "NPC Inventory",

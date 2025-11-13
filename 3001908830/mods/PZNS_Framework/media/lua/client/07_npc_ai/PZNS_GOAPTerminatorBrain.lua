@@ -5,6 +5,9 @@ local Planner = require("07_npc_ai/PZNS_GOAP_Planner") -- Your planner
 local PZNS_GatherWeapon = require("05_npc_actions/PZNS_GatherWeapon")
 local PZNS_HuntPlayer = require("05_npc_actions/PZNS_HuntPlayer")
 local PZNS_StalkPlayer = require("05_npc_actions/PZNS_StalkPlayer")
+local PZNS_WeaponAiming = require("05_npc_actions/PZNS_WeaponAiming")
+local PZNS_WeaponAttack = require("05_npc_actions/PZNS_WeaponAttack")
+local PZNS_WeaponReload = require("05_npc_actions/PZNS_WeaponReload")
 
 -- Toggle this to false to disable GOAPTerminator behavior for testing (can be set at runtime)
 PZNS_GOAP_ENABLED = PZNS_GOAP_ENABLED == nil and true or PZNS_GOAP_ENABLED
@@ -40,7 +43,6 @@ local MoveToPlayerAction = {
 }
 
 -- How many ticks to wait between planner invocations per NPC (reduce CPU and avoid double-planning)
--- How many ticks to wait between planner invocations per NPC (reduce CPU and avoid double-planning)
 -- Increased cooldown to avoid frequent replanning. Adjust if you want more responsive replans.
 local PLAN_COOLDOWN_TICKS = 120
 
@@ -65,6 +67,12 @@ local PLAN_COOLDOWN_TICKS = 120
         preconditions = { hasWeapon = true },
         effects = { weaponLoaded = true },
         perform = function(action, npcSurvivor, worldState)
+            -- Prefer the full reload routine which uses timed actions and inventory checks
+            if PZNS_WeaponReload then
+                pcall(function() PZNS_WeaponReload(npcSurvivor) end)
+                return true
+            end
+            -- Fallback to a light helper if present
             if PZNS_UtilsNPCs and PZNS_UtilsNPCs.PZNS_SetLoadedGun then
                 pcall(function() PZNS_UtilsNPCs.PZNS_SetLoadedGun(npcSurvivor) end)
                 return true
@@ -134,6 +142,63 @@ local PLAN_COOLDOWN_TICKS = 120
         end
     }
 
+    -- Aim weapon action: try to set NPC into aiming state; keep action active until aimed or target lost
+    local AimWeaponAction = {
+        name = "AimWeapon",
+        cost = 1,
+        preconditions = { hasWeapon = true, playerSeen = true, inAimRange = true },
+        effects = { aimed = true },
+        perform = function(action, npcSurvivor, worldState)
+            print("[GOAP_AimWeapon] perform called for " .. tostring(npcSurvivor and npcSurvivor.survivorID))
+            if not PZNS_WeaponAiming then return false end
+            -- Ensure aimTarget is set
+            if worldState.playerPosition then
+                npcSurvivor.aimTarget = getPlayer()
+            end
+            pcall(function() PZNS_WeaponAiming(npcSurvivor) end)
+            local npcIso = npcSurvivor.npcIsoPlayerObject
+            if npcIso and npcIso:NPCGetAiming() == true then
+                print("[GOAP_AimWeapon] NPC is aiming")
+                return true
+            end
+            print("[GOAP_AimWeapon] NPC not yet aiming")
+            return false
+        end
+    }
+
+    -- Attack action: invoke weapon attack repeatedly until target is dead or out of sight
+    local AttackWeaponAction = {
+        name = "AttackWeapon",
+        cost = 1,
+        preconditions = { aimed = true, hasWeapon = true, inAimRange = true },
+        effects = { playerEliminated = true },
+        perform = function(action, npcSurvivor, worldState)
+            print("[GOAP_AttackWeapon] perform called for " .. tostring(npcSurvivor and npcSurvivor.survivorID))
+            -- Ensure we have a target
+            if not worldState.playerPosition then return true end -- nothing to do, let planner re-evaluate
+            npcSurvivor.aimTarget = getPlayer()
+            npcSurvivor.canAttack = true
+            -- Run aiming/attack routines; these rely on timed ticks internally
+            pcall(function() PZNS_WeaponAiming(npcSurvivor) end)
+            pcall(function() PZNS_WeaponAttack(npcSurvivor) end)
+            -- If the player is dead or not visible, consider action complete so planner can move on
+            local player = getPlayer()
+            if not player or not player:isAlive() then
+                return true
+            end
+            local nx, ny = npcSurvivor.npcIsoPlayerObject:getX(), npcSurvivor.npcIsoPlayerObject:getY()
+            local px, py = player:getX(), player:getY()
+            local dx, dy = px - nx, py - ny
+            local dist2 = dx*dx + dy*dy
+            if dist2 > (30*30) then -- lost sight / too far
+                print("[GOAP_AttackWeapon] target out of range, dist2=" .. tostring(dist2))
+                return true
+            end
+            -- Keep this action active while attacking
+            return false
+        end
+    }
+
 local AttackPlayerAction = {
     name = "AttackPlayer",
     cost = 2,
@@ -181,9 +246,18 @@ function GOAPTerminatorBrain.sense(npcSurvivor)
             worldState.playerSeen = true
             worldState.playerPosition = { x = px, y = py, z = player:getZ() }
         end
-        
+
         if dist2 <= 4 then -- close range
             worldState.atPlayer = true
+        end
+
+        -- If we have a weapon, expose whether the player is within aiming range (squared distance compare)
+        local weapon = npcIsoPlayer:getPrimaryHandItem()
+        if weapon and weapon:IsWeapon() then
+            local range = weapon:getMaxRange() or 2
+            worldState.inAimRange = (dist2 <= (range * range))
+        else
+            worldState.inAimRange = false
         end
     end
     
@@ -237,6 +311,8 @@ function GOAPTerminatorBrain.tick(npcSurvivor)
     local actions = {
         MoveToPlayerAction,
         AttackPlayerAction,
+        AimWeaponAction,
+        AttackWeaponAction,
         GatherWeaponAction,
         ReloadWeaponAction,
         UseMeleeWeaponAction,

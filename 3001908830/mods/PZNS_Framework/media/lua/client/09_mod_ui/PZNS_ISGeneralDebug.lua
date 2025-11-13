@@ -2,7 +2,7 @@
 --**                    THE INDIE STONE                    **
 --**				  Author: turbotutone				   **
 --***********************************************************
-require("PZNS_ISDebugPanelBase")
+require("09_mod_ui/PZNS_ISDebugPanelBase")
 local PZNS_UtilsDataNPCs = require("02_mod_utils/PZNS_UtilsDataNPCs");
 
 ---@class PZNS_ISGeneralDebug : PZNS_ISDebugPanelBase

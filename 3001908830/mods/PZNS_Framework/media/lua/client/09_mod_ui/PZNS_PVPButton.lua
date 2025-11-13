@@ -21,8 +21,12 @@ function PZNS_CreatePVPButton()
     PVPButton:setImage(PVPTextureOff);
     PVPButton:setVisible(true);
     PVPButton:setEnable(true);
-    -- protect UI creation from throwing errors
+    -- protect UI creation from throwing errors and log registration for diagnostics
     pcall(function()
+        print("[PZNS_UI_LOG] PZNS_PVPButton:addToUIManager playerExists=" .. tostring(getSpecificPlayer(0) ~= nil))
+        if debug and debug.traceback then
+            print("[PZNS_UI_LOG] stack: " .. tostring(debug.traceback()))
+        end
         PVPButton:addToUIManager();
     end)
 end

@@ -271,6 +271,10 @@ function PZNS_CreateNPCPanelInfo()
 
     PZNS_NPCPanelInfo = PanelSurvivorInfo:new(100, 150, FONT_HGT_SMALL * 6 + 175, FONT_HGT_SMALL * 10 + 500 + 56)
     pcall(function()
+        print("[PZNS_UI_LOG] PZNS_NPCInfoPanel:addToUIManager playerExists=" .. tostring(getSpecificPlayer(0) ~= nil))
+        if debug and debug.traceback then
+            print("[PZNS_UI_LOG] stack: " .. tostring(debug.traceback()))
+        end
         PZNS_NPCPanelInfo:addToUIManager()
         PZNS_NPCPanelInfo:setVisible(false)
     end)

@@ -45,10 +45,13 @@ function PZNS_CheckZombieThreat(npcSurvivor)
     end
     --
     if (PZNS_CellZombiesList == nil) then
+        print("[PZNS_CheckZombieThreat] PZNS_CellZombiesList is nil")
         return isThreatExist;
     end
     --
-    for i = PZNS_CellZombiesList:size() - 1, 0, -1 do
+    local listSize = PZNS_CellZombiesList:size()
+    print("[PZNS_CheckZombieThreat] zombie list size=" .. tostring(listSize))
+    for i = listSize - 1, 0, -1 do
         local zombie = PZNS_CellZombiesList:get(i);
         --
         if (PZNS_WorldUtils.PZNS_IsObjectZombieActive(zombie) == true) then
@@ -70,6 +73,7 @@ function PZNS_CheckZombieThreat(npcSurvivor)
                     end
                     --
                     if (targetThreatDistance < 3) then
+                        print("[PZNS_CheckZombieThreat] close zombie prioritized at distance=" .. tostring(targetThreatDistance))
                         break;
                     end
                 end

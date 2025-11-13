@@ -53,6 +53,7 @@ local function meleeAttack(npcSurvivor, npcIsoPlayer, targetObject)
         --
         if (isTargetAlive == true) then
             -- PZNS_NPCSpeak(npcSurvivor, "Attacking target");
+            print("[PZNS_WeaponAttack] meleeAttack -> NPCSetAttack for " .. tostring(npcSurvivor and npcSurvivor.survivorID))
             npcIsoPlayer:NPCSetAttack(true);
             -- oZumbiAnalitico -- calculateNPCDamage(npcIsoPlayer, targetObject); 
         end
@@ -70,6 +71,7 @@ local function rangedAttack(npcSurvivor, npcIsoPlayer, targetObject)
         --
         if (isTargetAlive == true) then
             -- PZNS_NPCSpeak(npcSurvivor, "Attacking target");
+            print("[PZNS_WeaponAttack] rangedAttack -> NPCSetAttack for " .. tostring(npcSurvivor and npcSurvivor.survivorID))
             npcIsoPlayer:NPCSetAttack(true);
             -- oZumbiAnalitico -- calculateNPCDamage(npcIsoPlayer, targetObject);
         end

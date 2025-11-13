@@ -58,7 +58,16 @@ function PZNS_UpdateISWorldMapRender()
                 end
             end
         )
-        btnShowGroupMembersLocation:addToUIManager();
+        -- Guard: only add UI when the local player exists to avoid creating UI in main menu
+        if getSpecificPlayer(0) ~= nil then
+            pcall(function()
+                print("[PZNS_UI_LOG] PZNS_WorldMap:btnShowGroupMembersLocation:addToUIManager playerExists=" .. tostring(getSpecificPlayer(0) ~= nil))
+                if debug and debug.traceback then
+                    print("[PZNS_UI_LOG] stack: " .. tostring(debug.traceback()))
+                end
+                btnShowGroupMembersLocation:addToUIManager()
+            end)
+        end
         btnShowGroupMembersLocation:setVisible(false);
         btnShowGroupMembersLocation:setAlwaysOnTop(true);
     end

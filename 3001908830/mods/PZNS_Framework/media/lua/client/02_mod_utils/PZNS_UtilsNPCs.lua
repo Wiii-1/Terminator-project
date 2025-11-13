@@ -4,6 +4,9 @@
 --]]
 local PZNS_UtilsDataNPCs = require("02_mod_utils/PZNS_UtilsDataNPCs");
 local PZNS_UtilsNPCs = {};
+-- keep track of invulnerable NPCs
+local PZNS_InvulnerableNPCs = {}
+local PZNS_invulnerableHealTick = 0
 --- Cows: Add a specified trait to the target npcSurvivor.
 ---@param npcSurvivor any
 ---@param traitName string
@@ -606,6 +609,37 @@ function PZNS_UtilsNPCs.PZNS_ClearAllNPCsAllNeedsLevel()
         end
     end
 end
+
+--- Cows: Mark a npc as invulnerable (keeps them alive by periodic heals).
+---@param npcSurvivor any
+---@param value boolean
+function PZNS_UtilsNPCs.PZNS_SetNPCInvulnerable(npcSurvivor, value)
+    if not npcSurvivor then return end
+    npcSurvivor.isInvulnerable = (value == true)
+    local id = npcSurvivor.survivorID
+    if value == true and id then
+        PZNS_InvulnerableNPCs[id] = npcSurvivor
+    elseif id then
+        PZNS_InvulnerableNPCs[id] = nil
+    end
+end
+
+-- Periodically heal invulnerable NPCs so they effectively have "unlimited life" while still present in the world
+Events.OnTick.Add(function()
+    -- cheap throttle: run every 30 ticks (~0.5s depending on tick rate)
+    PZNS_invulnerableHealTick = (PZNS_invulnerableHealTick or 0) + 1
+    if PZNS_invulnerableHealTick < 30 then return end
+    PZNS_invulnerableHealTick = 0
+    for id, npc in pairs(PZNS_InvulnerableNPCs) do
+        if npc and npc.npcIsoPlayerObject and npc.npcIsoPlayerObject:getBodyDamage() then
+            local bd = npc.npcIsoPlayerObject:getBodyDamage()
+            -- Heal a modest amount to ensure survivability without masking other systems
+            pcall(function()
+                bd:AddGeneralHealth(100)
+            end)
+        end
+    end
+end)
 
 --- Cows: Check and update the npcSurvivor isStuckTicks, using the input tickInterval
 ---@param npcSurvivor any
