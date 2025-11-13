@@ -22,3 +22,6 @@ function PZNS_WalkToSquareXYZ(npcSurvivor, squareX, squareY, squareZ)
 		PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction);
 	end
 end
+
+-- Return module table for require() callers
+return { PZNS_WalkToSquareXYZ = PZNS_WalkToSquareXYZ }

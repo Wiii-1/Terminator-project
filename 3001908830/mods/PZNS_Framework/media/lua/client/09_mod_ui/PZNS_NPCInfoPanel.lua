@@ -264,9 +264,16 @@ function PZNS_ShowNPCInfoPanel(text_info)
 end
 
 function PZNS_CreateNPCPanelInfo()
+    -- Guard: only create NPC info panel when the local player exists to avoid creating UI in main menu
+    if getSpecificPlayer(0) == nil then
+        return;
+    end
+
     PZNS_NPCPanelInfo = PanelSurvivorInfo:new(100, 150, FONT_HGT_SMALL * 6 + 175, FONT_HGT_SMALL * 10 + 500 + 56)
-    PZNS_NPCPanelInfo:addToUIManager()
-    PZNS_NPCPanelInfo:setVisible(false)
+    pcall(function()
+        PZNS_NPCPanelInfo:addToUIManager()
+        PZNS_NPCPanelInfo:setVisible(false)
+    end)
 end
 
 --- Cows: Placeholder for getting and displaying NPC info.

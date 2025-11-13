@@ -6,6 +6,11 @@ local PZNS_CombatUtils = require("02_mod_utils/PZNS_CombatUtils");
 
 --- Cows: Creates the Toggle button to enable local/client-only players pvp.
 function PZNS_CreatePVPButton()
+    -- Guard: ensure local player exists before creating UI (avoid creating UI in main menu)
+    if getSpecificPlayer(0) == nil then
+        return;
+    end
+
     PVPTextureOn = getTexture("media/textures/PVPOn.png");
     PVPTextureOff = getTexture("media/textures/PVPOff.png");
 
@@ -16,5 +21,8 @@ function PZNS_CreatePVPButton()
     PVPButton:setImage(PVPTextureOff);
     PVPButton:setVisible(true);
     PVPButton:setEnable(true);
-    PVPButton:addToUIManager();
+    -- protect UI creation from throwing errors
+    pcall(function()
+        PVPButton:addToUIManager();
+    end)
 end

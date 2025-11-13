@@ -1,6 +1,6 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 local PZNS_WalkToSquareXYZ = require("05_npc_actions/PZNS_WalkTo").PZNS_WalkToSquareXYZ
-local Planner = require("GOAP_Planner") -- Your planner
+local Planner = require("07_npc_ai/PZNS_GOAP_Planner") -- Your planner
 -- PZNS action modules (wrapped by GOAP actions below)
 local PZNS_GatherWeapon = require("05_npc_actions/PZNS_GatherWeapon")
 local PZNS_HuntPlayer = require("05_npc_actions/PZNS_HuntPlayer")
@@ -27,6 +27,9 @@ local MoveToPlayerAction = {
         return true
     end
 }
+
+-- How many ticks to wait between planner invocations per NPC (reduce CPU and avoid double-planning)
+local PLAN_COOLDOWN_TICKS = 10
 
     -- Additional GOAP actions (wrappers around PZNS actions)
     local GatherWeaponAction = {
@@ -218,9 +221,49 @@ function GOAPTerminatorBrain.tick(npcSurvivor)
         HuntPlayerAction
     }
     
-    -- Get or create plan
+    -- Decrement per-NPC plan cooldown
+    if not npcSurvivor.goapPlanCooldown then npcSurvivor.goapPlanCooldown = 0 end
+    if npcSurvivor.goapPlanCooldown > 0 then npcSurvivor.goapPlanCooldown = npcSurvivor.goapPlanCooldown - 1 end
+
+    -- Get or create plan. If Planner.goap_plan is missing, use a small fallback to avoid crashes.
     if not npcSurvivor.goapPlan or #npcSurvivor.goapPlan == 0 then
-        npcSurvivor.goapPlan = Planner.goap_plan(worldState, actions, goal)
+        -- Only invoke the planner if cooldown expired to avoid running it every tick
+        if npcSurvivor.goapPlanCooldown <= 0 then
+            -- Avoid evaluating Planner.goap_plan when Planner is nil (Kahlua may try to index during evaluation)
+            if Planner ~= nil then
+                if type(Planner.goap_plan) == "function" then
+                    print("[PZNS_GOAPTerminatorBrain] Invoking planner for ", tostring(npcSurvivor.survivorID))
+                    local ok, planOrErr = pcall(function()
+                        return Planner.goap_plan(worldState, actions, goal, { verbose = false })
+                    end)
+                    if ok and planOrErr then
+                        npcSurvivor.goapPlan = planOrErr
+                        npcSurvivor.goapPlanCooldown = PLAN_COOLDOWN_TICKS
+                    else
+                        print("[PZNS_GOAPTerminatorBrain] Planner.goap_plan call failed: ", tostring(planOrErr))
+                        npcSurvivor.goapPlan = {}
+                        -- small cooldown to avoid spamming failures
+                        npcSurvivor.goapPlanCooldown = math.max(2, math.floor(PLAN_COOLDOWN_TICKS / 4))
+                    end
+                else
+                    print("[PZNS_GOAPTerminatorBrain] Planner.goap_plan is not a function; using fallback plan")
+                    if worldState and worldState.playerSeen then
+                        npcSurvivor.goapPlan = { MoveToPlayerAction }
+                    else
+                        npcSurvivor.goapPlan = {}
+                    end
+                    npcSurvivor.goapPlanCooldown = PLAN_COOLDOWN_TICKS
+                end
+            else
+                print("[PZNS_GOAPTerminatorBrain] Planner is nil; using fallback plan")
+                if worldState and worldState.playerSeen then
+                    npcSurvivor.goapPlan = { MoveToPlayerAction }
+                else
+                    npcSurvivor.goapPlan = {}
+                end
+                npcSurvivor.goapPlanCooldown = PLAN_COOLDOWN_TICKS
+            end
+        end
     end
     
     -- Execute next action

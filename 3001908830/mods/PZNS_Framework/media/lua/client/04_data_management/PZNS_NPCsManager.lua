@@ -332,6 +332,14 @@ function PZNS_NPCsManager.SpawnTerminator(x, y, z)
     terminator.isTerminator = true
     terminator.goapPlan = nil
     terminator.canSaveData = false
+    -- Mark modData so server spawners / other systems know this NPC is managed by PZNS
+    if terminator.npcIsoPlayerObject and terminator.npcIsoPlayerObject.getModData then
+        local ok, md = pcall(function() return terminator.npcIsoPlayerObject:getModData() end)
+        if ok and md then
+            md.isPZNS = true
+            md.isTerminator = true
+        end
+    end
     -- Make Terminator invulnerable and ensure alive on spawn
     if PZNS_UtilsNPCs.PZNS_SetNPCInvulnerable then
         PZNS_UtilsNPCs.PZNS_SetNPCInvulnerable(terminator, true)
@@ -349,6 +357,13 @@ function PZNS_NPCsManager.SpawnTerminator(x, y, z)
 
     local activeNPCs = PZNS_UtilsDataNPCs.PZNS_GetCreateActiveNPCsModData();
     activeNPCs[terminator.survivorID] = terminator
+
+    -- Set the job so job menu and routines can treat this NPC as a Terminator
+    if PZNS_UtilsNPCs and PZNS_UtilsNPCs.PZNS_SetNPCJob then
+        PZNS_UtilsNPCs.PZNS_SetNPCJob(terminator, "Terminator")
+    else
+        terminator.jobName = "Terminator"
+    end
 
     print(string.format("[PZNS_NPCsManager.SpawnTerminator] Spawned Terminator %s at %d,%d,%d", terminator.survivorID, x, y, z))
     return terminator
