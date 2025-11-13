@@ -17,9 +17,13 @@ function PZNS_WalkToSquareXYZ(npcSurvivor, squareX, squareY, squareZ)
     );
 
 	if targetSquare ~= nil then
-		npcIsoPlayer:NPCSetRunning(false);
-		local walkAction = ISWalkToTimedAction:new(npcIsoPlayer, targetSquare);
-		PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction);
+        npcIsoPlayer:NPCSetRunning(false);
+        local walkAction = ISWalkToTimedAction:new(npcIsoPlayer, targetSquare);
+        -- debug: report walk request and whether the action was added
+        print("[PZNS_WalkTo] NPC id=" .. tostring(npcSurvivor.survivorID) .. " requesting walk to (" .. tostring(squareX) .. "," .. tostring(squareY) .. "," .. tostring(squareZ) .. ")")
+        local added = PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction);
+        print("[PZNS_WalkTo] add result for NPC id=" .. tostring(npcSurvivor.survivorID) .. ": " .. tostring(added))
+        return added
 	end
 end
 

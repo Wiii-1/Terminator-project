@@ -522,6 +522,42 @@ function PZNS_GeneralAI.PZNS_IsPathBlocked(npcSurvivor)
     return false;
 end
 
+--- Attempt to open a door or smash a window in front of the NPC so the path is no longer blocked.
+--- Returns true if an attempt to open/smash was made (action queued or immediate), false otherwise.
+---@param npcSurvivor any
+function PZNS_GeneralAI.PZNS_AttemptOpenDoorOrWindow(npcSurvivor)
+    if (PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false) then
+        return false;
+    end
+    local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject;
+    if not npcIsoPlayer then return false end
+
+    -- Check for door in front
+    local isoDoor = PZNS_GeneralAI.PZNS_IsInFrontOfDoor(npcIsoPlayer);
+    if isoDoor then
+        -- If the door exists and is closed, try to toggle it (open)
+        if not isoDoor:IsOpen() then
+            -- Use ToggleDoor which handles ownership/permission. If locked/barricaded ToggleDoor may still do something depending on game state.
+            pcall(function() isoDoor:ToggleDoor(npcIsoPlayer) end)
+            print("[PZNS_GeneralAI] NPC id=" .. tostring(npcSurvivor.survivorID) .. " attempted to open door at (" .. tostring(isoDoor:getX()) .. "," .. tostring(isoDoor:getY()) .. ")")
+            return true
+        end
+    end
+
+    -- Check for window in front
+    local isoWindow = PZNS_GeneralAI.PZNS_IsInFrontOfWindow(npcIsoPlayer);
+    if isoWindow then
+        -- If the window exists and is not smashed, smash it so NPC can pass
+        if not isoWindow:isSmashed() then
+            pcall(function() isoWindow:smashWindow() end)
+            print("[PZNS_GeneralAI] NPC id=" .. tostring(npcSurvivor.survivorID) .. " smashed window at (" .. tostring(isoWindow:getX()) .. "," .. tostring(isoWindow:getY()) .. ")")
+            return true
+        end
+    end
+
+    return false
+end
+
 --- WIP - Cows: Added this function to check if an NPC is actively hostile to the player
 ---@param npcSurvivor any
 ---@return boolean

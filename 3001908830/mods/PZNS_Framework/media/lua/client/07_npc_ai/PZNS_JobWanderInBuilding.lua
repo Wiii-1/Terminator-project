@@ -37,6 +37,12 @@ function PZNS_JobWanderInBuilding(npcSurvivor)
             --- Cows: Check if the NPC path is blocked every 60 ticks or so.
             if (npcSurvivor.jobTicks % 60 == 0) then
                 if (PZNS_GeneralAI.PZNS_IsPathBlocked(npcSurvivor) == true) then
+                    -- Try to open door or smash window blocking the path before giving up.
+                    local attempted = PZNS_GeneralAI.PZNS_AttemptOpenDoorOrWindow(npcSurvivor)
+                    if attempted then
+                        PZNS_UtilsNPCs.PZNS_ClearQueuedNPCActions(npcSurvivor);
+                        return;
+                    end
                     PZNS_UtilsNPCs.PZNS_ClearQueuedNPCActions(npcSurvivor);
                     npcSurvivor.jobSquare = nil;
                     return;

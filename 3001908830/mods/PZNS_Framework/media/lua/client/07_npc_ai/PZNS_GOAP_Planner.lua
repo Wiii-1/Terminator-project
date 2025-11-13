@@ -51,9 +51,13 @@ local function isApplicable(action, state)
 end
 
 function Planner.goap_plan(StartState, actions, goal, opts)
-    print("[GOAP_Planner] starting GOAP planning")
     opts = opts or {}
     local verbose = opts.verbose
+    if opts.maxExpansions then
+        if verbose then print("[GOAP_Planner] starting GOAP planning (maxExpansions="..tostring(opts.maxExpansions)..")") end
+    else
+        if verbose then print("[GOAP_Planner] starting GOAP planning") end
+    end
 
     local open = {
         { state = deepcopy(StartState), plan = {}, g = 0, h = heuristic(StartState, goal) }
@@ -65,6 +69,12 @@ function Planner.goap_plan(StartState, actions, goal, opts)
         table.sort(open, function(a,b) return (a.g + a.h) < (b.g + b.h) end)
         local node = table.remove(open, 1)
         expansions = expansions + 1
+
+        -- Respect a max expansions cap if provided to avoid runaway planning
+        if opts.maxExpansions and expansions >= opts.maxExpansions then
+            if verbose then print("[GOAP_Planner] stopping search: reached maxExpansions", expansions) end
+            return nil
+        end
 
         local nodeHash = stateHash(node.state)
         if isGoalSatisfied(node.state, goal) then

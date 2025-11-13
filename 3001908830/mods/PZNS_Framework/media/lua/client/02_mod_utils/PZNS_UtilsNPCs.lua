@@ -357,8 +357,10 @@ function PZNS_UtilsNPCs.PZNS_GetNPCActionsQueuedCount(npcSurvivor)
         return;
     end
     local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject;
-    local actionsCount = #ISTimedActionQueue.getTimedActionQueue(npcIsoPlayer.queue);
-    return actionsCount;
+    if not npcIsoPlayer then return 0 end
+    local actionQueue = ISTimedActionQueue.getTimedActionQueue(npcIsoPlayer);
+    if not actionQueue or not actionQueue.queue then return 0 end
+    return #actionQueue.queue
 end
 
 --- Cows: Adds an action to ISTimedActionQueue; this is a wrapper function that allows the npcSurvivor to be updated without changing ISTimedActionQueue
@@ -372,10 +374,17 @@ function PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, npcQueueAction)
     local actionsCount = PZNS_UtilsNPCs.PZNS_GetNPCActionsQueuedCount(npcSurvivor);
     local actionsQueueLimit = 30;
 
+    -- Debug: report attempt to enqueue action
+    print("[PZNS_AddNPCActionToQueue] NPC id=" .. tostring(npcSurvivor.survivorID) .. " queuedActions=" .. tostring(actionsCount) .. " limit=" .. tostring(actionsQueueLimit) .. " actionType=" .. tostring(npcQueueAction.class))
+
     if (actionsCount < actionsQueueLimit) then
         ISTimedActionQueue.add(npcQueueAction);
+        print("[PZNS_AddNPCActionToQueue] Action added for NPC id=" .. tostring(npcSurvivor.survivorID))
+        return true
     else
+        print("[PZNS_AddNPCActionToQueue] Action queue full, clearing for NPC id=" .. tostring(npcSurvivor.survivorID))
         PZNS_UtilsNPCs.PZNS_ClearQueuedNPCActions(npcSurvivor);
+        return false
     end
 end
 
@@ -516,7 +525,9 @@ local function clearNeedsIsoPlayer(npcIsoPlayer)
         STATS:setStress(0.0);
         STATS:setStressFromCigarettes(0.0);
         STATS:setThirst(0.0);
-        BODYDAMAGE:AddGeneralHealth(25);
+        -- Previously healed NPCs here which could make them effectively unkillable during testing.
+        -- Removing the unconditional heal to allow combat to work as expected.
+        -- BODYDAMAGE:AddGeneralHealth(25);
     end
 end
 
@@ -578,7 +589,9 @@ function PZNS_UtilsNPCs.PZNS_ClearNPCAllNeedsLevel(npcSurvivor)
         npcIsoPlayer:getStats():setStress(0.0);
         npcIsoPlayer:getStats():setStressFromCigarettes(0.0);
         npcIsoPlayer:getStats():setThirst(0.0);
-        npcIsoPlayer:getBodyDamage():AddGeneralHealth(25);
+        -- Do NOT auto-heal NPC here; this was causing NPCs to be effectively unkillable.
+        -- If a small passive heal is desired, replace the line above with a much smaller value.
+        -- npcIsoPlayer:getBodyDamage():AddGeneralHealth(1);
     end
 end
 

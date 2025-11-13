@@ -31,10 +31,10 @@ function PZNS_JobTerminator(npcSurvivor)
 end
 
 -- Register job in PZNS job manager (adds menu label and job mapping)
-pcJobMgr = require("07_npc_ai/PZNS_ManageJobs")
-if npcJobMgr and npcJobMgr.updatePZNSJobsTable then
+-- Register the Terminator job with the central job manager so it appears in the Jobs menu
+if PZNS_ManageJobs and PZNS_ManageJobs.updatePZNSJobsTable then
     pcall(function()
-        npcJobMgr.updatePZNSJobsTable("Terminator", PZNS_JobTerminator, "ContextMenu_PZNS_Terminator")
+        PZNS_ManageJobs.updatePZNSJobsTable("Terminator", PZNS_JobTerminator, "ContextMenu_PZNS_Terminator")
     end)
 end
 

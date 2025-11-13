@@ -6,6 +6,9 @@ local PZNS_GatherWeapon = require("05_npc_actions/PZNS_GatherWeapon")
 local PZNS_HuntPlayer = require("05_npc_actions/PZNS_HuntPlayer")
 local PZNS_StalkPlayer = require("05_npc_actions/PZNS_StalkPlayer")
 
+-- Toggle this to false to disable GOAPTerminator behavior for testing (can be set at runtime)
+PZNS_GOAP_ENABLED = PZNS_GOAP_ENABLED == nil and true or PZNS_GOAP_ENABLED
+
 local GOAPTerminatorBrain = {}
 
 -- GOAP Actions using PZNS movement/combat
@@ -15,21 +18,31 @@ local MoveToPlayerAction = {
     preconditions = { playerSeen = true },
     effects = { atPlayer = true },
     perform = function(action, npcSurvivor, worldState)
+        -- If we're already at the player, consider this action complete so the next action can run.
+        if worldState.atPlayer then
+            return true
+        end
+
         if not worldState.playerPosition then return false end
-        
-        -- Use PZNS's movement system
-        PZNS_WalkToSquareXYZ(
+
+        -- Use PZNS's movement system to queue a walk action towards the player's current position.
+        -- We return false here so the MoveToPlayerAction remains the current plan step until the NPC
+        -- actually reaches the player (worldState.atPlayer becomes true). This prevents GOAP from
+        -- consuming the movement step immediately and re-invoking the planner each tick.
+        local _ = PZNS_WalkToSquareXYZ(
             npcSurvivor,
             worldState.playerPosition.x,
             worldState.playerPosition.y,
             worldState.playerPosition.z
         )
-        return true
+        return false
     end
 }
 
 -- How many ticks to wait between planner invocations per NPC (reduce CPU and avoid double-planning)
-local PLAN_COOLDOWN_TICKS = 10
+-- How many ticks to wait between planner invocations per NPC (reduce CPU and avoid double-planning)
+-- Increased cooldown to avoid frequent replanning. Adjust if you want more responsive replans.
+local PLAN_COOLDOWN_TICKS = 120
 
     -- Additional GOAP actions (wrappers around PZNS actions)
     local GatherWeaponAction = {
@@ -183,7 +196,18 @@ end
 
 -- Run GOAP planning and execute
 function GOAPTerminatorBrain.tick(npcSurvivor)
+    -- Quick toggle to disable GOAP processing for debugging other NPC logic
+    if not PZNS_GOAP_ENABLED then
+        return
+    end
+
     if not npcSurvivor then return end
+
+    -- Only run GOAP for NPCs explicitly marked as Terminators.
+    -- This is defensive: prevents accidental invocation from affecting all NPCs.
+    if not npcSurvivor.isTerminator then
+        return
+    end
 
     -- Ensure the NPC's square is loaded and the IsoPlayer exists
     if PZNS_UtilsNPCs and PZNS_UtilsNPCs.PZNS_GetIsNPCSquareLoaded and not PZNS_UtilsNPCs.PZNS_GetIsNPCSquareLoaded(npcSurvivor) then
@@ -191,7 +215,7 @@ function GOAPTerminatorBrain.tick(npcSurvivor)
     end
 
     -- Make sure Terminators are marked with a job so PZNS systems treat them as an AI-controlled unit
-    if npcSurvivor.jobName ~= "Terminator" then
+    if npcSurvivor.isTerminator and npcSurvivor.jobName ~= "Terminator" then
         npcSurvivor.jobName = "Terminator"
     end
 
@@ -224,6 +248,10 @@ function GOAPTerminatorBrain.tick(npcSurvivor)
     -- Decrement per-NPC plan cooldown
     if not npcSurvivor.goapPlanCooldown then npcSurvivor.goapPlanCooldown = 0 end
     if npcSurvivor.goapPlanCooldown > 0 then npcSurvivor.goapPlanCooldown = npcSurvivor.goapPlanCooldown - 1 end
+    -- If we don't currently have a plan and the player isn't visible, skip planning (saves CPU)
+    if (not npcSurvivor.goapPlan or #npcSurvivor.goapPlan == 0) and not worldState.playerSeen then
+        return
+    end
 
     -- Get or create plan. If Planner.goap_plan is missing, use a small fallback to avoid crashes.
     if not npcSurvivor.goapPlan or #npcSurvivor.goapPlan == 0 then
@@ -233,8 +261,9 @@ function GOAPTerminatorBrain.tick(npcSurvivor)
             if Planner ~= nil then
                 if type(Planner.goap_plan) == "function" then
                     print("[PZNS_GOAPTerminatorBrain] Invoking planner for ", tostring(npcSurvivor.survivorID))
+                    -- Ask planner to limit expansions to avoid runaway searches in complex states
                     local ok, planOrErr = pcall(function()
-                        return Planner.goap_plan(worldState, actions, goal, { verbose = false })
+                        return Planner.goap_plan(worldState, actions, goal, { verbose = false, maxExpansions = 1000 })
                     end)
                     if ok and planOrErr then
                         npcSurvivor.goapPlan = planOrErr

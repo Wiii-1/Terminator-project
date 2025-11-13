@@ -21,7 +21,8 @@ PZNS_JobsText = {
     Undertaker = { "Undertaker", getText("ContextMenu_PZNS_Undertaker") },
     Remove = { "Remove From Group", getText("ContextMenu_PZNS_Remove_From_Group") },
     WanderInBuilding = { "Wander In Building", "Wander In Building" },
-    WanderInCell = { "Wander In Cell", "Wander In Cell" }
+    WanderInCell = { "Wander In Cell", "Wander In Cell" },
+    Terminator = { "Terminator", getText("ContextMenu_PZNS_Terminator") }
 };
 
 -- WIP - Cows: Need to rethink how Global variables are used...
@@ -30,7 +31,8 @@ PZNS_Jobs = {
     -- Farmer = doNothing, -- WIP - Cows: Commented out until implementation is ready.
     -- Engineer = doNothing, -- WIP - Cows: Commented out until implementation is ready.
     Guard = PZNS_JobGuard,
-    Undertaker = PZNS_JobUndertaker
+    Undertaker = PZNS_JobUndertaker,
+    Terminator = PZNS_JobTerminator
 };
 
 --- Cows: Helper function for PZNS_UpdateAllJobsRoutines(), can also be used to update an npc's routine when their job is changed.
