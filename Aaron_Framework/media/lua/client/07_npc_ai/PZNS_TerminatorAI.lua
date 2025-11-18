@@ -1,0 +1,31 @@
+-- [[
+--
+--  TODO:
+--  Ai
+--  Spawn/Initialize
+--  MoveTo (WalkTo)
+--  RunTo
+--  HuntPlayer
+--  StalkPlayer
+--  GatherWeapon
+--  EquipWeapon
+--  ReloadWeapon
+--  AimAtTarget
+--  Fire/RangeAttack
+--  MeleeAttack
+--  SwitchWeapon
+--  SeekCover/TakeCover
+--  OpenDoor/SmashWindow
+--  SearchForAmmo/Scavenge
+--  Flee/Retreat
+--  UseItem/HealSelf
+--  EnterVehicle/UseVehicle
+--  Wait/Idle/Observe
+--  Communicate/Shout/Taunt
+--  Assassinate/FinishingMove
+--  Patrol
+--  LootContainer
+--  GiveUp/SelfDestruct
+--
+--
+-- ]]
