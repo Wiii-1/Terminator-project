@@ -4,6 +4,10 @@
         "addHumanoidCharacter",
         "StalkPlayer",
         "getCell",
-        "TerminatorAgents"
+        "TerminatorAgents",
+        "isWeaponBroken"
+    ],
+    "Lua.diagnostics.disable": [
+        "unused-function"
     ]
 }

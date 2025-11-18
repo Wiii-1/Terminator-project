@@ -1,0 +1,14 @@
+may melee attack na nasa weapon attack 
+
+local function meleeAttack(npcSurvivor, npcIsoPlayer, targetObject) 
+    if (npcSurvivor.attackTicks >= meleeTicks) then
+        local isTargetAlive = targetObject:isAlive();
+        --
+        if (isTargetAlive == true) then
+            -- PZNS_NPCSpeak(npcSurvivor, "Attacking target");
+            npcIsoPlayer:NPCSetAttack(true);
+            -- oZumbiAnalitico -- calculateNPCDamage(npcIsoPlayer, targetObject); 
+        end
+        npcSurvivor.attackTicks = 0;
+    end
+end

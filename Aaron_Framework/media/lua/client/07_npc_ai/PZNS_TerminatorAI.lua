@@ -1,31 +1,33 @@
 -- [[
 --
 --  TODO:
+
+--  Actions for terminator
 --  Ai
 --  Spawn/Initialize
 --  MoveTo (WalkTo)
 --  RunTo
---  HuntPlayer
---  StalkPlayer
---  GatherWeapon
+--  HuntPlayer /
+--  StalkPlayer /
+--  GatherWeapon 
 --  EquipWeapon
---  ReloadWeapon
---  AimAtTarget
---  Fire/RangeAttack
---  MeleeAttack
+--  ReloadWeapon /
+--  AimAtTarget /
+--  Fire/RangeAttack/
+--  MeleeAttack/
 --  SwitchWeapon
 --  SeekCover/TakeCover
---  OpenDoor/SmashWindow
---  SearchForAmmo/Scavenge
---  Flee/Retreat
---  UseItem/HealSelf
+--  OpenDoor/SmashWindow 
+--  SearchForAmmo/Scavenge  x
+--  Flee/Retreat 
+--  UseItem/HealSelf x
 --  EnterVehicle/UseVehicle
---  Wait/Idle/Observe
---  Communicate/Shout/Taunt
---  Assassinate/FinishingMove
---  Patrol
---  LootContainer
---  GiveUp/SelfDestruct
+--  Wait/Idle/Observe x
+--  Communicate/Shout/Taunt x
+--  Assassinate/FinishingMove x             wii: i think di na to need for now? idk pero tingin ko di na need
+--  Patrol x
+--  LootContainer                           wii: tingin ko ron either to ay nasa loob ng Scavenge or separate.
+--  GiveUp/SelfDestruct x                   wii: nigga parang ayaw ko to gawin hahahaha i think yung animation is just fuck
 --
 --
 -- ]]
