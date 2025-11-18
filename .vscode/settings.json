@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.globals": [
+        "getOnlinePlayers",
+        "addHumanoidCharacter",
+        "StalkPlayer",
+        "getCell",
+        "TerminatorAgents"
+    ]
+}
