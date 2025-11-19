@@ -21,3 +21,5 @@ function PZNS_GOAPWeaponEquip:activate(npcSurvivor, weaponItem)
 
     return false
 end
+
+return PZNS_GOAPWeaponEquip;
