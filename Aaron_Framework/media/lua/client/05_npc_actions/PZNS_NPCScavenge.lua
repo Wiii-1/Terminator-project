@@ -15,7 +15,7 @@ local shotgunAmmoTypes = {
     ["Base.ShotgunShellsSlug"] = true,
 }
 
-local function isShogunWeapon(weaponItem)
+local function isShotgunWeapon(weaponItem)
     if not weaponItem then return false end
 
     local weaponType = weaponItem:getType()
@@ -26,7 +26,7 @@ local function isShogunWeapon(weaponItem)
     return false
 end
 
-local function isShogunAmmo(ammoItem)
+local function isShotgunAmmo(ammoItem)
     if not ammoItem then return false end
 
     local ammoType = ammoItem:getType()
@@ -84,12 +84,12 @@ local function findNearestItemOnMapOfTypes(npcSurvivor, itemTypesTable, searchRa
 end
 
 local function isDesiredShotgunOrAmmo(npcSurvivor, item)
-    if isShogunWeapon(item) then
+    if isShotgunWeapon(item) then
         local hasShotgun = findItemInInventoryOfTypes(npcSurvivor, shotgunTypes)
         if not hasShotgun then
             return true
         end
-    elseif isShogunAmmo(item) then
+    elseif isShotgunAmmo(item) then
         local hasShotgun = findItemInInventoryOfTypes(npcSurvivor, shotgunTypes)
         if hasShotgun then
             return true
