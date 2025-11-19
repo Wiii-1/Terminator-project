@@ -6,9 +6,19 @@ local PZNS_GOAPWeaponEquip = {}
 PZNS_GOAPWeaponEquip.name = "PZNS_GOAP_Weapon_Equip"
 PZNS_GOAPWeaponEquip.preconditions = {isWeaponAvailable = true}
 PZNS_GOAPWeaponEquip.effects = {hasWeaponEquipped = true}
+<<<<<<< HEAD
 PZNS_GOAPWeaponEquip.cost = 3.0
 
 function PZNS_GOAPWeaponEquip:activate(npcSurvivor, weaponItem)
+=======
+PZNS_GOAPWeaponEquip.cost = 1.0
+
+function PZNS_GOAPWeaponEquip:activate(npcSurvivor, weaponItem)
+    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+        return false
+    end
+
+>>>>>>> 6dcdeba (wrapped actions for GOAP Planner compatibility)
     if PZNS_NPCEquipWeapon.equipWeapon then
         return PZNS_NPCEquipWeapon.equipWeapon(npcSurvivor, weaponItem)
     elseif PZNS_NPCEquipWeapon.execute then
@@ -16,6 +26,10 @@ function PZNS_GOAPWeaponEquip:activate(npcSurvivor, weaponItem)
     end
 
     return false
+<<<<<<< HEAD
 end
 
 return PZNS_GOAPWeaponEquip;
+=======
+end
+>>>>>>> 6dcdeba (wrapped actions for GOAP Planner compatibility)
