@@ -27,9 +27,15 @@ function PZNS_GOAPWeaponEquip:activate(npcSurvivor, weaponItem)
 
     return false
 <<<<<<< HEAD
+<<<<<<< HEAD
 end
 
 return PZNS_GOAPWeaponEquip;
 =======
 end
 >>>>>>> 6dcdeba (wrapped actions for GOAP Planner compatibility)
+=======
+end
+
+return PZNS_GOAPWeaponEquip;
+>>>>>>> 3fb9774 (check)

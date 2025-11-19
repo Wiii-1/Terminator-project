@@ -1,14 +1,29 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
+<<<<<<< HEAD
 local PZNS_WeaponAiming = require("05_npc_actions/PZNS_WeaponAiming")
+=======
+local PZNS_WeaponAiming = require("02_mod_utils/PZNS_WeaponAiming")
+>>>>>>> 3fb9774 (check)
 
 local PZNS_GOAPWeaponAiming = {}
 PZNS_GOAPWeaponAiming.name = "PZNS_GOAP_Weapon_Aiming"
 PZNS_GOAPWeaponAiming.preconditions = {isWeaponEquipped = true, IsPVPActive = true, isTargetVisible = true}
 PZNS_GOAPWeaponAiming.effects = {hasWeaponAimed = true}
+<<<<<<< HEAD
 PZNS_GOAPWeaponAiming.cost = 6.0
 PZNS_GOAPWeaponAiming.isQueued = true
 
 function PZNS_GOAPWeaponAiming:activate(npcSurvivor, targetIsoObject)
+=======
+PZNS_GOAPWeaponAiming.cost = 1.0
+PZNS_GOAPWeaponAiming.isQueued = true
+
+function PZNS_GOAPWeaponAiming:activate(npcSurvivor, targetIsoObject)
+    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+        return false
+    end
+
+>>>>>>> 3fb9774 (check)
     return PZNS_WeaponAiming.aimAtTarget(npcSurvivor, targetIsoObject)
 end
 
