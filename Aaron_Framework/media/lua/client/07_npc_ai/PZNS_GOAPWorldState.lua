@@ -158,6 +158,7 @@ function PZNS_GOAPWorldState.buildWorldState (npcSurvivor, optionals)
         worldState.isAmmoLow = false
     end
 
+    -- health tracker lng to
     if npcIsoPlayer:getHealth() then 
         worldState.isHealthLow = (npcSurvivor.healthThreshold and npcIsoPlayer:getHealth() < npcSurvivor.healthThreshold) or (npcIsoPlayer:getHealth() < 30)
     else
@@ -168,4 +169,7 @@ function PZNS_GOAPWorldState.buildWorldState (npcSurvivor, optionals)
 end
 
 return PZNS_GOAPWorldState;
+<<<<<<< HEAD
 >>>>>>> e6b9386 (world state done)
+=======
+>>>>>>> e46b70d (Update PZNS_GOAPWorldState.lua)
