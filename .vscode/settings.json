@@ -5,7 +5,8 @@
         "StalkPlayer",
         "getCell",
         "TerminatorAgents",
-        "isWeaponBroken"
+        "isWeaponBroken",
+        "hand"
     ],
     "Lua.diagnostics.disable": [
         "unused-function"
