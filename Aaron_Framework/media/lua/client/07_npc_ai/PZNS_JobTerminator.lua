@@ -1,8 +1,7 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 local PZNS_WorldUtils = require("02_mod_utils/PZNS_WorldUtils")
 local PZNS_NPCsManager = require("04_data_management/PZNS_NPCsManager")
-local PZNS_GeneralAI = require("07_npc_ai/PZNS_GeneralAI")
-local PZNS_TerminatorAI = require("07_npc_ai/PZNS_TerminatorAI")
+local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 
 -- Terminator target Player
 local function getTargetIsoPlayerByID(targetID)
