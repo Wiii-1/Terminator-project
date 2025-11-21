@@ -1,5 +1,11 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
+<<<<<<< HEAD
 local TerminatorActions = require("07_npc_ai/PZNS_TerminatorActions")
+=======
+local PZNS_WorldUtils = require("02_mod_utils/PZNS_WorldUtils")
+local PZNS_NPCsManager = require("04_data_management/PZNS_NPCsManager")
+local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
+>>>>>>> 181eb3b (actions is finally called)
 
 -- ============================================================================
 -- CONFIGURATION - TUNE THESE FOR PERFORMANCE/BEHAVIOR
