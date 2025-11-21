@@ -232,96 +232,86 @@ local actions = {
     require("05_npc_actions/PZNS_GOAPSwitchWeapon"),
     require("05_npc_actions/PZNS_GOAPWalkTo"),
     require("05_npc_actions/PZNS_GOAPWeaponAiming"),
-    require("05_npc_actions/PZNS_GOAPWeaponAttack"),    
+    require("05_npc_actions/PZNS_GOAPWeaponAttack"),
     require("05_npc_actions/PZNS_GOAPWeaponEquip"),
     require("05_npc_actions/PZNS_GOAPWeaponReload"),
 }
 
-local PZNS_GOAPWorldState = require("05_npc_actions/PZNS_GOAPWorldState")
+local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 
-local local_copyState = function(state)
-    local newState = {}
-    for k, v in pairs(state) do
-        newState[k] = v
-    end
-    return newState
+-- shallow copy of a state table
+local local_copyState = function(s)
+    local t = {}
+    for k,v in pairs(s or {}) do t[k] = v end
+    return t
 end
 
-local local_meetsPreconditions = function(state, preconditions)
-    if not preconditions then
-        return true
-    end
-    for k, v in pairs(preconditions) do
-        if state[k] ~= v then
-            return false
-        end
+-- check preconditions (all keys in pre must match state)
+local local_meetsPreconditions = function(state, pre)
+    if not pre then return true end
+    for k,v in pairs(pre) do
+        if state[k] ~= v then return false end
     end
     return true
 end
 
-local function local_applyEffects(state, effects)
+-- apply effects to a copy of the state and return new state
+local local_applyEffects = function(state, effects)
     local ns = local_copyState(state)
-    for k, v in pairs(effects) do
-        ns[k] = v
-    end
+    for k,v in pairs(effects or {}) do ns[k] = v end
     return ns
 end
 
+-- deterministic text key for a state (used to detect revisits)
 local local_stateHash = function(state)
     local keys = {}
     for k,_ in pairs(state or {}) do table.insert(keys, k) end
     table.sort(keys)
-
     local parts = {}
-    for _,k in ipairs(keys) do parts[#parts+1] = tostring(k) .. "=" .. tostring(state[k]) end
+    for _,k in ipairs(keys) do parts[#parts+1] = k .. ":" .. tostring(state[k]) end
     return table.concat(parts, "|")
 end
 
-local local_heuristic = function(state, goalState)
-    local cost = 0 
-    for k, v in pairs (goalState or {}) do
-        if state[k] ~= v then
-            cost = cost + 1
-        end
-    end
-    return cost
+-- simple heuristic: number of mismatched goal predicates
+local local_heuristic = function(state, goal)
+    local n = 0
+    for k,v in pairs(goal or {}) do if state[k] ~= v then n = n + 1 end end
+    return n
 end
 
-function PZNS_GOAPPlanner.plan(worldState, goalState, actions)
+-- plan(worldState, goal, actionList?)
+-- returns ordered array of action modules or nil if no plan
+function PZNS_GOAPPlanner.startPlan(worldState, goal, actionList)
+    local available = actionList or actions
+    if not worldState or not goal then return nil end
 
-    local availableActions = actions or {}
-    if not worldState or not goalState then 
-        return nil 
-    end
+    local open = {}
+    local closed = {}
 
-    local openSet = {}
-    local closedSet = {}
+    table.insert(open, { state = local_copyState(worldState), g = 0, h = local_heuristic(worldState, goal), plan = {} })
 
-    table.insert (openSet, {local_copyState(worldState), g = 0, h = local_heuristic(worldState, goalState), plan = {}})
-    
-    while #openSet > 0 do
-        table.sort(openSet, function (a,b) return (a.g + a.h) < (b.g + b.h) end)
-        local currentNode = table.remove(openSet, 1)
+    while #open > 0 do
+        table.sort(open, function(a,b) return (a.g + a.h) < (b.g + b.h) end)
+        local node = table.remove(open, 1)
 
-        if local_heuristic(currentNode.state, goalState) == 0 then
-            return currentNode.plan
+        if local_heuristic(node.state, goal) == 0 then
+            return node.plan
         end
 
-        local stateHash = local_stateHash(currentNode.state)
-        if closedSet[currentNode] then goto continue end
-        closedSet[stateHash] = true
+        local nodeHash = local_stateHash(node.state)
+        if closed[nodeHash] then goto continue end
+        closed[nodeHash] = true
 
-        for _, actions in ipairs(availableActions) do
-            if actions and local_meetsPreconditions(currentNode.state, actions.preconditions) then
-                local newState = local_applyEffects(currentNode.state, actions.effects)
+        for _, act in ipairs(available) do
+            if act and local_meetsPreconditions(node.state, act.preconditions) then
+                local newState = local_applyEffects(node.state, act.effects)
                 local newPlan = {}
-
-                for i=1,#currentNode.plan do newPlan[i] = currentNode.plan[i] end
-                table.insert(newPlan, actions)
-                local g2 = currentNode.g + (actions.cost or 1)
-                local h2 = local_heuristic(newState, goalState)
-                if not closedSet[local_stateHash(newState)] then
-                    table.insert(openSet, {state = newState, g = g2, h = h2, plan = newPlan})
+                for i=1,#node.plan do newPlan[i] = node.plan[i] end
+                table.insert(newPlan, act)
+                local g2 = node.g + (act.cost or 1)
+                local nhash = local_stateHash(newState)
+                if not closed[nhash] then
+                    table.insert(open, { state = newState, g = g2, h = local_heuristic(newState, goal), plan = newPlan })
                 end
             end
         end
@@ -330,17 +320,17 @@ function PZNS_GOAPPlanner.plan(worldState, goalState, actions)
     end
 
     return nil
-
 end
 
-function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalState, actions)
-    if not npcSurvivor then
-        return nil
-    end
-
-    local worldState = PZNS_GOAPWorldState.getWorldStateForNPC(npcSurvivor)
-    return PZNS_GOAPPlanner.plan(worldState, goalState, actions)
+-- convenience: build world state snapshot for npc and plan
+function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goal, actionList)
+    local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = false })
+    return PZNS_GOAPPlanner.plan(ws, goal, actionList)
 end
 
+<<<<<<< HEAD
 return PZNS_GOAPPlanner;
 >>>>>>> 79e9ef7 (planner)
+=======
+return PZNS_GOAPPlanner
+>>>>>>> 7225aab (?)
