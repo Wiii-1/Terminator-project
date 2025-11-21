@@ -15,6 +15,7 @@ local actions = {
 }
 
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
+local PZNS_Goal = require("07_npc_ai/PZNS_Goal")
 
 -- shallow copy of a state table
 local local_copyState = function(s)
@@ -58,8 +59,8 @@ end
 
 -- plan(worldState, goal, actionList?)
 -- returns ordered array of action modules or nil if no plan
-function PZNS_GOAPPlanner.startPlan(worldState, goal, actionList)
-    local available = actionList or actions
+function PZNS_GOAPPlanner.plan(worldState, goal, actionList)
+    local available = actions
     if not worldState or not goal then return nil end
 
     local open = {}
@@ -100,9 +101,9 @@ function PZNS_GOAPPlanner.startPlan(worldState, goal, actionList)
 end
 
 -- convenience: build world state snapshot for npc and plan
-function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goal, actionList)
+function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goal, actions)
     local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = false })
-    return PZNS_GOAPPlanner.plan(ws, goal, actionList)
+    return PZNS_GOAPPlanner.plan(ws, goal, actions)
 end
 
 return PZNS_GOAPPlanner
