@@ -208,4 +208,3 @@ function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalOrDesired, actionList)
 	return PZNS_GOAPPlanner.startPlan(ws, desired, usedActions)
 end
 return PZNS_GOAPPlanner
-
