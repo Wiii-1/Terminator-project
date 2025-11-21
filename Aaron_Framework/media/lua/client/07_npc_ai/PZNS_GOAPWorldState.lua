@@ -6,6 +6,7 @@ local PZNS_GOAPWorldState = {}
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 local function defaults()
 	return {
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
@@ -14,6 +15,11 @@ local function defaults()
 	return {
 		isTargetVisible = false,
 >>>>>>> 8a4cfa7 (world state)
+=======
+local function defaults()
+	return {
+		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
+>>>>>>> 9f85c23 (world state and JobTerminator)
 		isTargetInAttackRange = false,
 		isTargetInFollowRange = false,
 		isHealthLow = false,
@@ -22,6 +28,7 @@ local function defaults()
 		isUnderAttack = false,
 		isAtPatrolPoint = false,
 	}
+<<<<<<< HEAD
 <<<<<<< HEAD
 end
 
@@ -111,78 +118,78 @@ local function defaults ()
 >>>>>>> 8a4cfa7 (world state)
 =======
 >>>>>>> e8192a9 (test)
+=======
+>>>>>>> 9f85c23 (world state and JobTerminator)
 end
 
 function PZNS_GOAPWorldState.PZNS_CreateWorldState()
-    local worldState = defaults()
-    return worldState
+	local worldState = defaults()
+	return worldState
 end
 
-function PZNS_GOAPWorldState.buildWorldState (npcSurvivor, optionals)
-    optionals = optionals or {}
-    local worldState = defaults()
+function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
+	-- NPC
+	if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+		return worldState
+	end
+	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
 
-    if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then 
-        return worldState
-    end
+	-- Target
+	if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
+		npcSurvivor.followTargetID = targetID
+	end
+	if not targetID or targetID == "" then
+		print(string.format("Invalid targetID (%s) for Terminator", targetID))
+		return worldState
+	end
+	local targetIsoPlayer = getTargetIsoPlayerByID(targetID)
+	--
+	if targetIsoPlayer == nil then
+		return worldState
+	end
 
-    local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
+	-- Distace between NPC and target
+	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
+	if distanceFromTarget <= TerminatorFollowRange then
+		worldState.isTargetInFollowRange = true
+	end
 
-    local handItem = npcIsoPlayer:getPrimaryHandItem()
-    worldState.isWeaponEquipped = PZNS_WorldUtils.PZNS_IsItemWeapon(handItem)
+	if distanceFromTarget <= 30 then
+		worldState.isTargetVisible = true
+	end
 
+	-- Primary
+	local handItem = npcIsoPlayer:getPrimaryHandItem()
+	if handItem == nil then
+		return worldState
+	end
 
-    -- player visibility lng idk if tama to
-    local target = npcSurvivor.currentTarget
-    if target and PZNS_WorldUtils and PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(target) then 
-        local targetIsoPlayer = target.npcIsoPlayerObject
-        worldState.isTargetVisible = PZNS_WorldUtils.PZNS_IsObjectVisible(npcIsoPlayer, targetIsoPlayer)
+	worldState.isWeaponEquipped = handItem:isWeapon()
+	-- Ammo
+	local ammoCount
+	if not handItem:isRanged() and not andItem:IsWeapon() then
+		return worldState
+	else
+		local npc_inventory = npcIsoPlayer:getInventory()
+		local ammoType = handItem:getAmmoType()
+		local currentAmmo = handItem:getCurrentAmmoCount()
+		local bullet = npc_inventory:getItemCount(ammoType)
+		ammoCount = bullet + currentAmmo
+	end
 
-        local distanceToTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
-        worldState.isTargetInAttackRange = distanceToTarget <= npcSurvivor.attackRange
-        worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-    end
+	if ammoCount <= 5 then
+		worldState.isAmmoLow = true
+	end
 
-    -- check ng range lng to sa player
-    if target and target.getX then
-        if PZNS_WorldUtils and PZNS_UtilsNPCs.PZNS_GetDistanceBetweenTwoObjects then
-            local distanceToTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, target)
-            worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-        else 
-            local dx = npcIsoPlayer:getX() - target:getX()
-            local dy = npcIsoPlayer:getY() - target:getY()
-            local distanceToTarget = math.sqrt(dx * dx + dy * dy)
-            worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-        end
-    else
-        return worldState
-    end
+	-- Health
+	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
+		worldState.isHealthLow = true
+	end
 
-    -- if i'm correct ron eto yung check ng ammo para sa isang ranged weapon
-    if npcHandItem and npcHandItem.isRanged and npcHandItem:isRanged() then
-        if npcHandItem:getAmmoType() then
-            local ammoCount = npcIsoPlayer:getInventory():getItemCount(npcHandItem:getAmmoType())
-            local currentAmmo = npcHandItem:getCurrentAmmoCount() or 0
-            local perfire = npcHandItem:getPerFire() or 1
-            ammoCount = ammoCount + currentAmmo
-            worldState.isAmmoLow = ammoCount < 5
-        else
-            worldState.isAmmoLow = false
-        end
-    else
-        worldState.isAmmoLow = false
-    end
-
-    -- health tracker lng to
-    if npcIsoPlayer:getHealth() then 
-        worldState.isHealthLow = (npcSurvivor.healthThreshold and npcIsoPlayer:getHealth() < npcSurvivor.healthThreshold) or (npcIsoPlayer:getHealth() < 30)
-    else
-        worldState.isHealthLow = false
-    end
-
-    return worldState
+	return worldState
 end
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 return PZNS_GOAPWorldState;
@@ -196,3 +203,6 @@ return PZNS_GOAPWorldState
 =======
 return PZNS_GOAPWorldState;
 >>>>>>> e8192a9 (test)
+=======
+return PZNS_GOAPWorldState
+>>>>>>> 9f85c23 (world state and JobTerminator)
