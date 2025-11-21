@@ -58,7 +58,7 @@ end
 
 -- plan(worldState, goal, actionList?)
 -- returns ordered array of action modules or nil if no plan
-function PZNS_GOAPPlanner.startPlan(worldState, goal, actionList)
+function PZNS_GOAPPlanner.plan(worldState, goal, actionList)
     local available = actionList or actions
     if not worldState or not goal then return nil end
 
