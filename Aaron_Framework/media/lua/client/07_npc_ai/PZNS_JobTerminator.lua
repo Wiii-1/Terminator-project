@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
@@ -21,13 +22,17 @@ local TerminatorActions = require("07_npc_ai/PZNS_TerminatorActions")
 =======
 local PZNS_WorldUtils = require("02_mod_utils/PZNS_WorldUtils")
 local PZNS_NPCsManager = require("04_data_management/PZNS_NPCsManager")
+=======
+local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
+>>>>>>> 9f85c23 (world state and JobTerminator)
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
->>>>>>> 181eb3b (actions is finally called)
+local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
 
--- ============================================================================
--- CONFIGURATION - TUNE THESE FOR PERFORMANCE/BEHAVIOR
--- ============================================================================
+--- @param npcSurvivor PZNS_NPCSurvivor
+--- @param targetID string
+function PZNS_JobTerminator(npcSurvivor, targetID)
 
+<<<<<<< HEAD
 local CONFIG = {
 	PLAN_COOLDOWN_TICKS = 120, -- Plan every 2 seconds (lower = more responsive, higher = faster)
 	MAX_EXPANSIONS = 50, -- Stop A* search after N expansions (prevents runaway)
@@ -590,3 +595,8 @@ return {
 	config = CONFIG,
 }
 >>>>>>> 074fff2 (rm)
+=======
+	-- GOAP Planner
+	-- Where goap planner will run
+end
+>>>>>>> 9f85c23 (world state and JobTerminator)
