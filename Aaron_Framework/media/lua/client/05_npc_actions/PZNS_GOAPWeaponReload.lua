@@ -2,8 +2,12 @@
 local PZNS_WeaponReload = require("05_npc_actions/PZNS_WeaponReload") 
 =======
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
+<<<<<<< HEAD
 local PZNS_WeaponReload = require("02_mod_utils/PZNS_WeaponReload") 
 >>>>>>> 6dcdeba (wrapped actions for GOAP Planner compatibility)
+=======
+local PZNS_WeaponReload = require("05_npc_actions/PZNS_WeaponReload") 
+>>>>>>> 0050aad (still fixing)
 
 local PZNS_GOAPWeaponReload = {}
 PZNS_GOAPWeaponReload.name = "PZNS_GOAP_Weapon_Reload"

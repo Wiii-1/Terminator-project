@@ -1,9 +1,13 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 <<<<<<< HEAD
+<<<<<<< HEAD
 local PZNS_WalkTo = require("05_npc_actions/PZNS_WalkTo")
 =======
 local PZNS_WalkTo = require("05_npc_actions/PZNS_NPCWalkTo")
 >>>>>>> 3fb9774 (check)
+=======
+local PZNS_WalkTo = require("05_npc_actions/PZNS_WalkTo")
+>>>>>>> 0050aad (still fixing)
 
 local PZNS_GOAPWalkTo = {}
 PZNS_GOAPWalkTo.name = "PZNS_GOAP_Walk_To"
