@@ -7,6 +7,7 @@ local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
 
+<<<<<<< HEAD
 -- Terminator target Player
 local function getTargetIsoPlayerByID(targetID)
 	local targetIsoPlayer
@@ -256,6 +257,82 @@ end
 return PZNS_JobTerminator
 =======
 -- ============================================================================
+<<<<<<< HEAD
+=======
+-- CONFIGURATION - TUNE THESE FOR PERFORMANCE/BEHAVIOR
+-- ============================================================================
+
+local CONFIG = {
+	PLAN_COOLDOWN_TICKS = 120, -- Plan every 2 seconds (lower = more responsive, higher = faster)
+	MAX_EXPANSIONS = 50, -- Stop A* search after N expansions (prevents runaway)
+	SIGHT_RANGE = 400, -- ~20 tiles squared
+	CLOSE_RANGE = 4, -- Within striking distance
+	AIM_RANGE_MULTIPLIER = 1.0, -- Weapon range check multiplier
+	VERBOSE = false, -- Enable debug logging
+}
+
+-- ============================================================================
+-- HEURISTIC WEIGHTS - Prioritize goals intelligently
+-- ============================================================================
+-- Higher weight = more important to A* search
+-- This guides the planner toward realistic goals faster
+
+local HEURISTIC_WEIGHTS = {
+	playerEliminated = 10, -- Primary goal: kill player
+	atPlayer = 5, -- Essential precondition
+	aimed = 2, -- Good to have before attacking
+	hasWeapon = 3, -- Critical precondition
+	weaponLoaded = 2, -- Important for ranged combat
+	safe = 1, -- Low priority fallback
+}
+
+-- ============================================================================
+-- GLOBAL STATE - Per-NPC caching
+-- ============================================================================
+
+local planCache = {} -- Cache plans by state hash
+local globalPlanCooldown = {} -- Per-NPC cooldown tracking
+
+-- ============================================================================
+-- UTILITY: State Hashing (for caching and debugging)
+-- ============================================================================
+
+local function stateToHash(state)
+	local keys = {}
+	for k in pairs(state) do
+		table.insert(keys, tostring(k))
+	end
+	table.sort(keys)
+
+	local parts = {}
+	for _, k in ipairs(keys) do
+		local v = state[k]
+		parts[#parts + 1] = tostring(k) .. "=" .. tostring(v)
+	end
+
+	return table.concat(parts, ";")
+end
+
+-- ============================================================================
+-- UTILITY: Weighted Heuristic (guides A* search)
+-- ============================================================================
+
+local function calculateHeuristic(state, goal)
+	local h = 0
+
+	for goalKey, goalValue in pairs(goal) do
+		if state[goalKey] ~= goalValue then
+			-- Weight this mismatch by importance
+			local weight = HEURISTIC_WEIGHTS[goalKey] or 1
+			h = h + weight
+		end
+	end
+
+	return h
+end
+
+-- ============================================================================
+>>>>>>> 3a7514b (I've been resolving merge conlfict :((()
 -- A* PLANNING ENGINE (Optimized)
 -- ============================================================================
 
@@ -666,6 +743,7 @@ return {
 	stateHash = stateToHash,
 	config = CONFIG,
 }
+<<<<<<< HEAD
 >>>>>>> 074fff2 (rm)
 =======
 	-- GOAP Planner
@@ -677,3 +755,6 @@ end
 
 return PZNS_JobTerminator
 >>>>>>> 0050aad (still fixing)
+=======
+>>>>>>> fd00689 (resolve merge conflict)
+>>>>>>> 3a7514b (I've been resolving merge conlfict :((()
