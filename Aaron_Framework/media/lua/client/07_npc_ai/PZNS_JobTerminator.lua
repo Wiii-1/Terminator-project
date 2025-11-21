@@ -7,7 +7,6 @@ local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
 
-<<<<<<< HEAD
 -- Terminator target Player
 local function getTargetIsoPlayerByID(targetID)
 	local targetIsoPlayer
@@ -255,6 +254,7 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 end
 
 return PZNS_JobTerminator
+<<<<<<< HEAD
 =======
 -- ============================================================================
 <<<<<<< HEAD
@@ -758,3 +758,5 @@ return PZNS_JobTerminator
 =======
 >>>>>>> fd00689 (resolve merge conflict)
 >>>>>>> 3a7514b (I've been resolving merge conlfict :((()
+=======
+>>>>>>> e038117 (Merge conflict and git test)
