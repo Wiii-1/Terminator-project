@@ -1,4 +1,4 @@
-local PZNS_GOAPPlanner = {}
+
 
 local actions = {
     require("05_npc_actions/PZNS_GOAPGunMagazine"),
@@ -14,8 +14,50 @@ local actions = {
     require("05_npc_actions/PZNS_GOAPWeaponReload"),
 }
 
-local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_Goal = require("07_npc_ai/PZNS_Goal")
+local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
+
+local PZNS_GOAPPlanner = {}
+
+local goals = {
+    -- require each goal module you have here
+    require("07_npc_ai/GOAP_GOALS/GetWeapon_Goal"),
+    require("07_npc_ai/GOAP_GOALS/killPlayer_Goal"),
+    -- add more goal modules as you create them
+}
+
+local M = {}
+
+function M.getGoals()
+    return goals
+end
+
+function M.geValidGoals()
+    local validGoals = {}
+    for _, goal in ipairs(goals) do
+        if goal.isValid() then
+            table.insert(validGoals, goal)
+        end
+    end
+    return validGoals
+end
+
+function M.selectBest(npc)
+    local selectBestGoal = nil
+    local highestPriority = -math.huge  
+    for _, goal in ipairs(goals) do
+        if goal.isValid(npc) then
+            local priority = goal.priority(npc)
+            if priority > highestPriority then
+                highestPriority = priority
+                selectBestGoal = goal
+            end
+        end
+    end
+    return selectBestGoal
+end
+
+
 
 -- shallow copy of a state table
 local local_copyState = function(s)
@@ -77,9 +119,9 @@ function PZNS_GOAPPlanner.plan(worldState, goal, actionList)
         end
 
         local nodeHash = local_stateHash(node.state)
-        if closed[nodeHash] then goto continue end
-        closed[nodeHash] = true
-
+        if not closed[nodeHash] then 
+            closed[nodeHash] = true
+            
         for _, act in ipairs(available) do
             if act and local_meetsPreconditions(node.state, act.preconditions) then
                 local newState = local_applyEffects(node.state, act.effects)
@@ -93,17 +135,53 @@ function PZNS_GOAPPlanner.plan(worldState, goal, actionList)
                 end
             end
         end
-
-        ::continue::
+        end
+        return nil
     end
-
-    return nil
 end
 
 -- convenience: build world state snapshot for npc and plan
-function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goal, actions)
+function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalOrDesired, actionList)
     local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = false })
-    return PZNS_GOAPPlanner.plan(ws, goal, actions)
-end
+    if not ws then
+        print("PZNS_GOAPPlanner: failed to build world state")
+        return nil
+    end
 
+    local desired = nil
+    local usedActions = actionList or actions
+
+    -- Resolve nil => auto-select best goal module
+    if not goalOrDesired then
+        local selected = PZNS_GOAPGoals.selectBest(npcSurvivor)
+        if not selected then
+            print("PZNS_GOAPPlanner: no valid goal found for NPC")
+            return nil
+        end
+        if type(selected.getDesiredState) ~= "function" then
+            print("PZNS_GOAPPlanner: selected goal missing getDesiredState()")
+            return nil
+        end
+        local ok, ds = pcall(selected.getDesiredState, npcSurvivor)
+        if not ok or type(ds) ~= "table" then
+            print("PZNS_GOAPPlanner: selected goal.getDesiredState() failed or returned non-table")
+            return nil
+        end
+        desired = ds
+    elseif type(goalOrDesired) == "table" and type(goalOrDesired.getDesiredState) == "function" then
+        local ok, ds = pcall(goalOrDesired.getDesiredState, npcSurvivor)
+        if not ok or type(ds) ~= "table" then
+            print("PZNS_GOAPPlanner: provided goal module failed getDesiredState()")
+            return nil
+        end
+        desired = ds
+    else
+        desired = goalOrDesired
+    end
+
+    -- debug: list desired keys
+    for k,v in pairs(desired) do print("PZNS_GOAPPlanner: desired ->", k, v) end
+
+    return PZNS_GOAPPlanner.startPlan(ws, desired, usedActions)
+end
 return PZNS_GOAPPlanner
