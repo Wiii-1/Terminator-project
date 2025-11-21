@@ -1,12 +1,12 @@
 local PZNS_WorldUtils = require("02_mod_utils/PZNS_WorldUtils")
-local PZNS_RunTo = require("05_npc_actions/PZNS_NPCRunTo")
-local PZNS_WalkTo = require("05_npc_actions/PZNS_NPCWalkTo")
+local PZNS_RunTo = require("05_npc_actions/PZNS_RunTo")
+local PZNS_WalkTo = require("05_npc_actions/PZNS_WalkTo")
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-local PZNS_NPCsManager = require("07_npc_ai/PZNS_NPCsManager")
+local PZNS_NPCsManager = require("04_data_management/PZNS_NPCsManager")
 
 local HuntPlayer = {};
 
-function PZNS_HuntPlayer.setLastKnown(npcSurvivor, x, y, z, sourcePlayer)
+function HuntPlayer.setLastKnown(npcSurvivor, x, y, z, sourcePlayer)
     if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
         return
     end
@@ -18,7 +18,7 @@ function PZNS_HuntPlayer.setLastKnown(npcSurvivor, x, y, z, sourcePlayer)
     npcSurvivor.lastKnownPlayer = sourcePlayer
 end
 
-function PZNS_HuntPlayer.execute(npcSurvivor)
+function HuntPlayer.execute(npcSurvivor)
     if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
         return
     end

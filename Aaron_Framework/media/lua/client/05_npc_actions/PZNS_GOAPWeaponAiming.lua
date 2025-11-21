@@ -1,5 +1,5 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-local PZNS_WeaponAiming = require("02_mod_utils/PZNS_WeaponAiming")
+local PZNS_WeaponAiming = require("05_npc_actions/PZNS_WeaponAiming")
 
 local PZNS_GOAPWeaponAiming = {}
 PZNS_GOAPWeaponAiming.name = "PZNS_GOAP_Weapon_Aiming"

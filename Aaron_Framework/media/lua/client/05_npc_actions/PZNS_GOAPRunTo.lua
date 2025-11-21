@@ -1,5 +1,5 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-local PZNS_RunTo = require("05_npc_actions/PZNS_NPCRunTo")
+local PZNS_RunTo = require("05_npc_actions/PZNS_RunTo")
 
 local PZNS_GOAPRunTo = {}
 PZNS_GOAPRunTo.name = "PZNS_GOAP_Run_To"

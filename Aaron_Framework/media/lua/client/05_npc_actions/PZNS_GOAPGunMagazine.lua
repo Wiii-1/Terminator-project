@@ -1,5 +1,5 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-local PZNS_GunMagasine = require("02_mod_utils/PZNS_GunMagasine")
+local PZNS_GunMagazine = require("05_npc_actions/PZNS_GunMagazine")
 
 local PZNS_GOAPGunMagazine = {}
 PZNS_GOAPGunMagazine.name = "PZNS_GOAP_Gun_Magazine"
@@ -12,7 +12,7 @@ function PZNS_GOAPGunMagazine:activate(npcSurvivor, weaponItem, magazineItem)
         return false
     end
 
-    return PZNS_GunMagasine.loadMagazineIntoWeapon(npcSurvivor, weaponItem, magazineItem)
+    return PZNS_GunMagazine.loadMagazineIntoWeapon(npcSurvivor, weaponItem, magazineItem)
 end
 
 return PZNS_GOAPGunMagazine;
