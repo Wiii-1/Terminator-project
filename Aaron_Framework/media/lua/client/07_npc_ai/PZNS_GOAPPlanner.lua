@@ -212,6 +212,7 @@ function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalOrDesired, actionList)
 	return PZNS_GOAPPlanner.startPlan(ws, desired, usedActions)
 end
 return PZNS_GOAPPlanner
+<<<<<<< HEAD
 
 =======
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
@@ -446,3 +447,5 @@ end
 return PZNS_GOAPPlanner
 
 >>>>>>> 0050aad (still fixing)
+=======
+>>>>>>> d19d96a (still git rebaseeeee)
