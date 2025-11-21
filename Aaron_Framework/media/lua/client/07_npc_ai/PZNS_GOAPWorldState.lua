@@ -7,6 +7,9 @@ local PZNS_GOAPWorldState = {}
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e038117 (Merge conflict and git test)
 local function defaults()
 	return {
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
@@ -30,6 +33,9 @@ local function defaults()
 	}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e038117 (Merge conflict and git test)
 end
 
 function PZNS_GOAPWorldState.PZNS_CreateWorldState()
@@ -99,6 +105,7 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 end
 
 return PZNS_GOAPWorldState
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> e8192a9 (test)
@@ -206,3 +213,5 @@ return PZNS_GOAPWorldState;
 =======
 return PZNS_GOAPWorldState
 >>>>>>> 9f85c23 (world state and JobTerminator)
+=======
+>>>>>>> e038117 (Merge conflict and git test)
