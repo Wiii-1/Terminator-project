@@ -7,7 +7,6 @@ local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
 
-<<<<<<< HEAD
 -- Terminator target Player
 local function getTargetIsoPlayerByID(targetID)
 	local targetIsoPlayer
@@ -19,6 +18,7 @@ local function getTargetIsoPlayerByID(targetID)
 		if targetNPC then
 			targetIsoPlayer = targetNPC.npcIsoPlayerObject
 		end
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -81,46 +81,22 @@ local function stateToHash(state)
 		table.insert(keys, tostring(k))
 >>>>>>> fd00689 (resolve merge conflict)
 >>>>>>> 0a51ab6 (updating head or smthn)
+=======
+>>>>>>> c65b64a (hays git rebase)
 	end
-	table.sort(keys)
-
-	local parts = {}
-	for _, k in ipairs(keys) do
-		local v = state[k]
-		parts[#parts + 1] = tostring(k) .. "=" .. tostring(v)
-	end
-
-	return table.concat(parts, ";")
+	return targetIsoPlayer
 end
 
-<<<<<<< HEAD
 -- Terminator within follow range of the player
 local function isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer)
 	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
 	if distanceFromTarget > CompanionFollowRange then
 		return false
-=======
--- ============================================================================
--- UTILITY: Weighted Heuristic (guides A* search)
--- ============================================================================
-
-local function calculateHeuristic(state, goal)
-	local h = 0
-
-	for goalKey, goalValue in pairs(goal) do
-		if state[goalKey] ~= goalValue then
-			-- Weight this mismatch by importance
-			local weight = HEURISTIC_WEIGHTS[goalKey] or 1
-			h = h + weight
-		end
->>>>>>> fd00689 (resolve merge conflict)
 	end
-
-	return h
+	return true
 end
 >>>>>>> 0050aad (still fixing)
 
-<<<<<<< HEAD
 --- Execute a single action module. Try common function names; if none exist, apply effects instantly.
 local function executeAction(npc, act, ws)
 	if not act then
@@ -157,16 +133,8 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 	-- NPC validations
 	if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false then
 		return
-=======
--- ============================================================================
--- A* PLANNING ENGINE (Optimized)
--- ============================================================================
-
-local function planTerminatorActions(startState, availableActions, goal)
-	if CONFIG.VERBOSE then
-		print("[Terminator] Planning started, maxExpansions=" .. CONFIG.MAX_EXPANSIONS)
->>>>>>> fd00689 (resolve merge conflict)
 	end
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -910,11 +878,14 @@ local function senseWorld(npcSurvivor)
 		playerPosition = nil,
 	}
 
+=======
+>>>>>>> c65b64a (hays git rebase)
 	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
-	if not npcIsoPlayer then
-		return worldState
+	if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
+		npcSurvivor.followTargetID = targetID
 	end
 
+<<<<<<< HEAD
 	local player = getPlayer()
 	if not player then
 		return worldState
@@ -1125,10 +1096,54 @@ local function PZNS_JobTerminator(npcSurvivor)
 						print("[Terminator] Planning failed, will retry soon")
 					end
 				end
+=======
+	if not targetID or targetID == "" then
+		print(string.format("Invalid targetID (%s) for Terminator job", targetID))
+		-- optional existing calls left intact
+		PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Wander In Cell")
+		return
+	end
+	-- Player validations
+	local targetIsoPlayer = getTargetIsoPlayerByID(targetID)
+	if targetIsoPlayer == nil then
+		return
+	end
+
+	-- Build GOAP worldstate and request plan (auto-select best goal)
+	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = true })
+	if not ws then
+		print("PZNS_JobTerminator: failed to build world state")
+		return
+	end
+
+	local plan = PZNS_GOAPPlanner.planForNPC(npcSurvivor, nil, nil)
+	if not plan then
+		-- no plan found; you can fallback to other behaviors here
+		-- e.g., follow player if in range, wander otherwise
+		if isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer) then
+			-- continue following (existing follow job/logic)
+			-- PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Follow")
+		end
+		return
+	end
+
+	-- execute plan steps in order (blocking/synchronous example)
+	for i, act in ipairs(plan) do
+		local success = executeAction(npcSurvivor, act, ws)
+		if not success then
+			print("PZNS_JobTerminator: action failed - will replan next tick")
+			return -- stop and let next tick replan
+		end
+		-- update worldstate after successful action (many actions already modify world state)
+		if type(act.effects) == "table" then
+			for k, v in pairs(act.effects) do
+				ws[k] = v
+>>>>>>> c65b64a (hays git rebase)
 			end
 		end
 	end
 
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> 0a51ab6 (updating head or smthn)
@@ -1202,3 +1217,9 @@ return PZNS_JobTerminator
 =======
 >>>>>>> fd00689 (resolve merge conflict)
 >>>>>>> 0a51ab6 (updating head or smthn)
+=======
+	-- plan completed -> NPC achieved goal; you may reset job or choose next behavior
+end
+
+return PZNS_JobTerminator
+>>>>>>> c65b64a (hays git rebase)
