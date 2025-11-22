@@ -13,6 +13,7 @@ local function defaults()
 		isWeaponEquipped = false,
 		isUnderAttack = false,
 		isAtPatrolPoint = false,
+		isTargetDead = false,
 	}
 end
 
@@ -21,9 +22,16 @@ function PZNS_GOAPWorldState.PZNS_CreateWorldState()
 	return worldState
 end
 
-function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
+function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
+	options = options or {}
+	local worldState = defaults()
+	local heavyScan = options.heavyScan or false
+	local targetID = "Player" .. tostring(0)
+
+	print(targetID)
+
 	-- NPC
-	if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
 		return worldState
 	end
 	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
@@ -36,14 +44,16 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 		print(string.format("Invalid targetID (%s) for Terminator", targetID))
 		return worldState
 	end
-	local targetIsoPlayer = getTargetIsoPlayerByID(targetID)
-	--
+
+	local targetIsoPlayer = getSpecificPlayer(0)
+
 	if targetIsoPlayer == nil then
 		return worldState
 	end
 
 	-- Distace between NPC and target
 	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
+	print(distanceFromTarget)
 	if distanceFromTarget <= TerminatorFollowRange then
 		worldState.isTargetInFollowRange = true
 	end
@@ -58,10 +68,10 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 		return worldState
 	end
 
-	worldState.isWeaponEquipped = handItem:isWeapon()
+	worldState.isWeaponEquipped = handItem:IsWeapon()
 	-- Ammo
 	local ammoCount
-	if not handItem:isRanged() and not andItem:IsWeapon() then
+	if not handItem:isRanged() and not handItem:IsWeapon() then
 		return worldState
 	else
 		local npc_inventory = npcIsoPlayer:getInventory()
@@ -83,3 +93,4 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 end
 
 return PZNS_GOAPWorldState
+
