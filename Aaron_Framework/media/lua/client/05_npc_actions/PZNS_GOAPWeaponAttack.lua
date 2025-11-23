@@ -5,14 +5,10 @@ local PZNS_GOAPWeaponAttack = {}
 PZNS_GOAPWeaponAttack.name = "PZNS_GOAP_Weapon_Attack"
 PZNS_GOAPWeaponAttack.preconditions = {hasWeaponAimed = true, isTargetInRange = true, isWeaponEquipped = true}
 PZNS_GOAPWeaponAttack.effects = {hasAttackedTarget = true}
-PZNS_GOAPWeaponAttack.cost = 1.0
+PZNS_GOAPWeaponAttack.cost = 5.0
 
 function PZNS_GOAPWeaponAttack:activate(npcSurvivor, targetIsoObject)
-    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
-        return false
-    end
-
-    return PZNS_WeaponAttack.attackTarget(npcSurvivor, targetIsoObject)
+    PZNS_WeaponAttack.attackTarget(npcSurvivor, targetIsoObject)
 end
 
 return PZNS_GOAPWeaponAttack;

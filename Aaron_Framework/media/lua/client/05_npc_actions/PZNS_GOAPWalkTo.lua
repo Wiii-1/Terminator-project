@@ -8,10 +8,6 @@ PZNS_GOAPWalkTo.effects = {hasReachedWalkToLocation = true}
 PZNS_GOAPWalkTo.cost = 1.0
 
 function PZNS_GOAPWalkTo:activate(npcSurvivor, walkToLocation)
-    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
-        return false
-    end
-
     return PZNS_WalkTo.execute(npcSurvivor, walkToLocation)
 end
 

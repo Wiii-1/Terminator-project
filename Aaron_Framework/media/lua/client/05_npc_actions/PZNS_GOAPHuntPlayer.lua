@@ -5,14 +5,10 @@ local PZNS_GOAPHuntPlayer = {}
 PZNS_GOAPHuntPlayer.name = "PZNS_GOAP_Hunt_Player"
 PZNS_GOAPHuntPlayer.preconditions = {isPlayerVisible = true}
 PZNS_GOAPHuntPlayer.effects = {hasReachedPlayer = true}
-PZNS_GOAPHuntPlayer.cost = 1.0
+PZNS_GOAPHuntPlayer.cost = 7.0
 
 function PZNS_GOAPHuntPlayer:activate(npcSurvivor, targetID)
-    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
-        return false
-    end
-
-    return PZNS_NPCHuntPlayer.execute(npcSurvivor, targetID)
+    PZNS_NPCHuntPlayer.execute(npcSurvivor, targetID)
 end
 
 return PZNS_GOAPHuntPlayer;
