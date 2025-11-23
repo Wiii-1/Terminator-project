@@ -1,0 +1,24 @@
+local GOAP_Actions = {}
+
+function isValid() 
+    return true
+end
+
+function GOAP_Actions.get_Cost()
+    return 10000
+end
+
+function GOAP_Actions.get_preconditions() 
+    return {}
+end
+
+
+function GOAP_Actions.get_effects() 
+    return {}
+end
+
+function GOAP_Actions.perform(npcSurvivor, delta) 
+    return false
+end
+
+return GOAP_Actions

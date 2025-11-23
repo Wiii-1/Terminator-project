@@ -1,5 +1,3 @@
-local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-
 local PZNS_Goal = {}
 
 function PZNS_Goal.isValid()
