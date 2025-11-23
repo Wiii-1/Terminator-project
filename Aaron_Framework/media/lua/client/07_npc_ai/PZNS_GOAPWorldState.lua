@@ -3,87 +3,109 @@ local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 
 local PZNS_GOAPWorldState = {}
 
-local function defaults ()
-    return {
-        isTargetVisible = false,
-        isTargetInAttackRange = false,
-        isTargetInFollowRange = false,
-        isHealthLow = false,
-        isAmmoLow = false,
-        isWeaponEquipped = false,
-        isUnderAttack = false,
-        isAtPatrolPoint = false,
-    }
+local function defaults()
+	return {
+		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint,
+		isTargetInFollowRange = false,
+		isTargetInAttackRange = false,
+		isHealthLow = false,
+		isAmmoLow = false,
+		isWeaponEquipped = false,
+		isTargetDead = false,
+		isRunToLocationAvailable =false,
+		isWeaponAvailable = false,
+		isScavengeLocationAvailable = false,
+		isWalkToLocationAvailable = false,
+		hasAmmoAvailable = false,
+		hasWeaponReloaded = false,
+		hasWeaponAimed = false,	
+		hasReachedRunToLocation = false,
+		hasWeaponEquipped = false,
+		hasWeaponPickedUp = false,
+		hasScavengedItems = false,
+		hasReachedWalkToLocation = false,
+	}
 end
 
 function PZNS_GOAPWorldState.PZNS_CreateWorldState()
-    local worldState = defaults()
-    return worldState
+	local worldState = defaults()
+	return worldState
 end
 
-function PZNS_GOAPWorldState.buildWorldState (npcSurvivor, optionals)
-    optionals = optionals or {}
-    local worldState = defaults()
+function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
+	options = options or {}
+	local worldState = defaults()
+	local heavyScan = options.heavyScan or false
+	local targetID = "Player" .. tostring(0)
 
-    if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then 
-        return worldState
-    end
+	-- NPC
+	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+		return worldState
+	end
+	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
 
-    local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
+	-- Target
+	if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
+		npcSurvivor.followTargetID = targetID
+	end
+	if not targetID or targetID == "" then
+		print(string.format("Invalid targetID (%s) for Terminator", targetID))
+		return worldState
+	end
 
-    local handItem = npcIsoPlayer:getPrimaryHandItem()
-    worldState.isWeaponEquipped = PZNS_WorldUtils.PZNS_IsItemWeapon(handItem)
+	local targetIsoPlayer = getSpecificPlayer(0)
 
+	if targetIsoPlayer == nil then
+		return worldState
+	end
 
-    -- player visibility lng idk if tama to
-    local target = npcSurvivor.currentTarget
-    if target and PZNS_WorldUtils and PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(target) then 
-        local targetIsoPlayer = target.npcIsoPlayerObject
-        worldState.isTargetVisible = PZNS_WorldUtils.PZNS_IsObjectVisible(npcIsoPlayer, targetIsoPlayer)
+	if targetIsoPlayer:isAlive() == false then
+		worldState.isTargetDead = true
+	end
 
-        local distanceToTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
-        worldState.isTargetInAttackRange = distanceToTarget <= npcSurvivor.attackRange
-        worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-    end
+	-- Distace between NPC and target
+	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
+	if distanceFromTarget <= TerminatorFollowRange then
+		worldState.isTargetInFollowRange = true
+	end
 
-    -- check ng range lng to sa player
-    if target and target.getX then
-        if PZNS_WorldUtils and PZNS_UtilsNPCs.PZNS_GetDistanceBetweenTwoObjects then
-            local distanceToTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, target)
-            worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-        else 
-            local dx = npcIsoPlayer:getX() - target:getX()
-            local dy = npcIsoPlayer:getY() - target:getY()
-            local distanceToTarget = math.sqrt(dx * dx + dy * dy)
-            worldState.isTargetInFollowRange = distanceToTarget <= npcSurvivor.followRange
-        end
-    else
-        return worldState
-    end
+	if distanceFromTarget <= 30 then
+		worldState.isTargetVisible = true
+	end
 
-    -- if i'm correct ron eto yung check ng ammo para sa isang ranged weapon
-    if npcHandItem and npcHandItem.isRanged and npcHandItem:isRanged() then
-        if npcHandItem:getAmmoType() then
-            local ammoCount = npcIsoPlayer:getInventory():getItemCount(npcHandItem:getAmmoType())
-            local currentAmmo = npcHandItem:getCurrentAmmoCount() or 0
-            local perfire = npcHandItem:getPerFire() or 1
-            ammoCount = ammoCount + currentAmmo
-            worldState.isAmmoLow = ammoCount < 5
-        else
-            worldState.isAmmoLow = false
-        end
-    else
-        worldState.isAmmoLow = false
-    end
+	-- Primary
+	local handItem = npcIsoPlayer:getPrimaryHandItem()
+	if handItem == nil then
+		return worldState
+	end
+	worldState.isWeaponEquipped = handItem:IsWeapon()
 
-    -- health tracker lng to
-    if npcIsoPlayer:getHealth() then 
-        worldState.isHealthLow = (npcSurvivor.healthThreshold and npcIsoPlayer:getHealth() < npcSurvivor.healthThreshold) or (npcIsoPlayer:getHealth() < 30)
-    else
-        worldState.isHealthLow = false
-    end
+	-- Ammo and Attack range
+	local ammoCount
+	if handItem:isRanged() and handItem:IsWeapon() then
+		if distanceFromTarget < handItem:getMaxRange() then
+			worldState.isTargetInAttackRange = true
+		end
 
-    return worldState
+		local npc_inventory = npcIsoPlayer:getInventory()
+		local ammoType = handItem:getAmmoType()
+		local currentAmmo = handItem:getCurrentAmmoCount()
+		local bullet = npc_inventory:getItemCount(ammoType)
+		ammoCount = bullet + currentAmmo
+
+		if ammoCount <= 5 then
+			worldState.isAmmoLow = true
+		end
+	else
+		return worldState
+	end
+
+	-- Health
+	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
+		worldState.isHealthLow = true
+	end
+	return worldState
 end
 
-return PZNS_GOAPWorldState;
+return PZNS_GOAPWorldState
+
