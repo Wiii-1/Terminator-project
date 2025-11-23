@@ -364,7 +364,7 @@ end
 --- Cows: Adds an action to ISTimedActionQueue; this is a wrapper function that allows the npcSurvivor to be updated without changing ISTimedActionQueue
 ---@param npcSurvivor any
 ---@param npcQueueAction any
-function PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, npcQueueAction)
+function PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, npcQueueAction, action)
     if (npcSurvivor == nil or npcQueueAction == nil) then
         return;
     end
@@ -378,6 +378,8 @@ function PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, npcQueueAction)
         PZNS_UtilsNPCs.PZNS_ClearQueuedNPCActions(npcSurvivor);
     end
 end
+
+
 
 --- Cows Checks if NPC square is loaded, this is critical to ensure NPC IsoPlayer can act.
 ---@param npcSurvivor any

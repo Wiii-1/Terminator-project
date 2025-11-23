@@ -122,5 +122,28 @@ PZNS_Scavenge.isDesiredShotgunOrAmmo = isDesiredShotgunOrAmmo;
 PZNS_Scavenge.findNearestItemOnMapOfTypes = findNearestItemOnMapOfTypes;
 PZNS_Scavenge.findItemInInventoryOfTypes = findItemInInventoryOfTypes;
 
+function PZNS_ScavengeTimedAction:perform()
+    -- do default perform behaviour
+    ISBaseTimedAction.perform(self)
+
+    -- mark that the npc has scavenged items (action should set this when it actually picked items)
+    if self.npcSurvivor then
+        self.npcSurvivor.hasScavengedItems = true
+        -- clear target markers
+        self.npcSurvivor.scavengeTargetX = nil
+        self.npcSurvivor.scavengeTargetY = nil
+        self.npcSurvivor.scavengeTargetZ = nil
+    end
+end
+
+function PZNS_ScavengeTimedAction:stop()
+    ISBaseTimedAction.stop(self)
+    if self.npcSurvivor then
+        -- clear stale markers if aborted
+        self.npcSurvivor.scavengeTargetX = nil
+        self.npcSurvivor.scavengeTargetY = nil
+        self.npcSurvivor.scavengeTargetZ = nil
+    end
+end
 
 return PZNS_Scavenge;

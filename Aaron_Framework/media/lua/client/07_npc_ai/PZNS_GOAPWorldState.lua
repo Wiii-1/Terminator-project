@@ -75,6 +75,36 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		worldState.isTargetVisible = true
 	end
 
+	-- target marker
+	local function pointDistance(pointA, pointB)
+		local dx = pointA:x() - pointB:x()
+		local dy = pointA:y() - pointB:y()
+		return math.sqrt(dx * dx + dy * dy)
+	end
+	local reachThreshold = 1.5
+	
+
+	-- run marker
+	if npcSurvivor.runToX and npcSurvivor.runToY then
+		worldState.isRunToLocationAvailable = true
+		local runToPoint = pointDistance(npcIsoPlayer:getX(), npcIsoPlayer:getY(), npcSurvivor.runToX, npcSurvivor.runToY)
+		worldState.hasReachedRunToLocation = (runToPoint <= reachThreshold)
+	else
+		worldState.isRunToLocationAvailable = false
+		worldState.hasReachedRunToLocation = false
+	end
+
+	-- walk marker
+	if npcSurvivor.walkToX and npcSurvivor.walkToY then
+		worldState.isWalkToLocationAvailable = true
+		local d = pointDistance(npcIsoPlayer:getX(), npcIsoPlayer:getY(), npcSurvivor.walkToX, npcSurvivor.walkToY)
+		worldState.hasReachedWalkToLocation = (d <= reachThreshold)
+	else
+		worldState.isWalkToLocationAvailable = false
+		worldState.hasReachedWalkToLocation = false
+	end
+
+
 	-- Primary
 	local handItem = npcIsoPlayer and npcIsoPlayer.getPrimaryHandItem and npcIsoPlayer:getPrimaryHandItem() or nil
     worldState.isWeaponEquipped = false
