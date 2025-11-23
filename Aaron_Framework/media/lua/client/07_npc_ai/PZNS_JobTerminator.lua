@@ -5,6 +5,7 @@
 >>>>>>> 0050aad (still fixing)
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
+<<<<<<< HEAD
 local PZNS_GOAPGoals = require("07_npc_ai/PZNS_GOAPGoals")
 
 -- Terminator target Player
@@ -96,6 +97,8 @@ local function isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer)
 	return true
 end
 >>>>>>> 0050aad (still fixing)
+=======
+>>>>>>> 53ddd19 (Change AI)
 
 --- Execute a single action module. Try common function names; if none exist, apply effects instantly.
 local function executeAction(npc, act, ws)
@@ -1120,10 +1123,11 @@ local function PZNS_JobTerminator(npcSurvivor)
 	if not plan then
 		-- no plan found; you can fallback to other behaviors here
 		-- e.g., follow player if in range, wander otherwise
-		if isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer) then
-			-- continue following (existing follow job/logic)
-			-- PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Follow")
-		end
+		-- if isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer) then
+		-- continue following (existing follow job/logic)
+		-- PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Follow")
+		-- end
+		print("No plan :(( ")
 		return
 	end
 
