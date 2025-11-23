@@ -1,6 +1,6 @@
 local GOAP_Actions = {}
 
-function isValid() 
+function GOAP_Actions.isValid() 
     return true
 end
 
