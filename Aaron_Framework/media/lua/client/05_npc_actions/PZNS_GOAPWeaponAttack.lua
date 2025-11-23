@@ -3,7 +3,7 @@ local PZNS_WeaponAttack = require("02_mod_utils/PZNS_WeaponAttack")
 
 local PZNS_GOAPWeaponAttack = {}
 PZNS_GOAPWeaponAttack.name = "PZNS_GOAP_Weapon_Attack"
-PZNS_GOAPWeaponAttack.preconditions = {hasWeaponAimed = true, isTargetInRange = true, isWeaponEquipped = true}
+PZNS_GOAPWeaponAttack.preconditions = {hasWeaponAimed = true, isTargetInAttackRange = true, isWeaponEquipped = true}
 PZNS_GOAPWeaponAttack.effects = {hasAttackedTarget = true}
 PZNS_GOAPWeaponAttack.cost = 1.0
 

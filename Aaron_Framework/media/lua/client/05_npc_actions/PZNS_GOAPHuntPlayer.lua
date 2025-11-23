@@ -3,7 +3,7 @@ local PZNS_NPCHuntPlayer = require("05_npc_actions/PZNS_NPCHuntPlayer")
 
 local PZNS_GOAPHuntPlayer = {}
 PZNS_GOAPHuntPlayer.name = "PZNS_GOAP_Hunt_Player"
-PZNS_GOAPHuntPlayer.preconditions = {isPlayerVisible = true}
+PZNS_GOAPHuntPlayer.preconditions = {isPlayerVisible = false}
 PZNS_GOAPHuntPlayer.effects = {hasReachedPlayer = true}
 PZNS_GOAPHuntPlayer.cost = 1.0
 
