@@ -53,6 +53,8 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		return worldState
 	end
 
+
+
 	local targetIsoPlayer = getSpecificPlayer(0)
 
 	if targetIsoPlayer == nil then
@@ -74,31 +76,51 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 	end
 
 	-- Primary
-	local handItem = npcIsoPlayer:getPrimaryHandItem()
-	if handItem == nil then
-		return worldState
-	end
-	worldState.isWeaponEquipped = handItem:IsWeapon()
+	local handItem = npcIsoPlayer and npcIsoPlayer.getPrimaryHandItem and npcIsoPlayer:getPrimaryHandItem() or nil
+    worldState.isWeaponEquipped = false
+    worldState.isWeaponAvailable = false
+    worldState.hasWeaponEquipped = false
+    worldState.hasWeaponPickedUp = false
+    worldState.hasWeaponAimed = worldState.hasWeaponAimed or false
+    worldState.hasWeaponReloaded = worldState.hasWeaponReloaded or false
 
-	-- Ammo and Attack range
-	local ammoCount
-	if handItem:isRanged() and handItem:IsWeapon() then
-		if distanceFromTarget < handItem:getMaxRange() then
-			worldState.isTargetInAttackRange = true
-		end
+    if handItem and handItem:IsWeapon() then
+        worldState.isWeaponEquipped = true
+        worldState.isWeaponAvailable = true
+        worldState.hasWeaponEquipped = true
 
-		local npc_inventory = npcIsoPlayer:getInventory()
-		local ammoType = handItem:getAmmoType()
-		local currentAmmo = handItem:getCurrentAmmoCount()
-		local bullet = npc_inventory:getItemCount(ammoType)
-		ammoCount = bullet + currentAmmo
+        -- Ammo and attack range (only for ranged weapons)
+        if handItem.isRanged and handItem:IsWeapon() and handItem:isRanged() and handItem:IsWeapon() then
+            local npc_inventory = npcIsoPlayer:getInventory()
+            local ammoType = handItem:getAmmoType()
+            local currentAmmo = handItem:getCurrentAmmoCount() or 0
+            local bullet = (ammoType and npc_inventory and npc_inventory:getItemCount(ammoType)) or 0
+            local ammoCount = (bullet or 0) + (currentAmmo or 0)
 
-		if ammoCount <= 5 then
-			worldState.isAmmoLow = true
-		end
-	else
-		return worldState
-	end
+            worldState.hasAmmoAvailable = ammoCount > 0
+            worldState.isAmmoLow = (ammoCount <= 5)
+
+            local maxRange = handItem.getMaxRange and handItem:getMaxRange() or 0
+            if distanceFromTarget < maxRange then
+                worldState.isTargetInAttackRange = true
+            else
+                worldState.isTargetInAttackRange = false
+            end
+        else
+            -- melee weapon or no ranged API available
+            worldState.isTargetInAttackRange = false
+            worldState.hasAmmoAvailable = false
+            worldState.isAmmoLow = false
+        end
+    else
+        -- no handItem or not a weapon
+        worldState.isWeaponEquipped = false
+        worldState.isWeaponAvailable = false
+        worldState.hasWeaponEquipped = false
+        worldState.hasAmmoAvailable = false
+        worldState.isAmmoLow = false
+        worldState.isTargetInAttackRange = false
+    end
 
 	-- Health
 	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
