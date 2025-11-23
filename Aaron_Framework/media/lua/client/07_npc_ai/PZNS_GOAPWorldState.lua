@@ -79,7 +79,6 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
 		worldState.isHealthLow = true
 	end
-
 	return worldState
 end
 
