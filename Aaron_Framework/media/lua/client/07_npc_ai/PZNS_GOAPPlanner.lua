@@ -178,7 +178,7 @@ function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalOrDesired, actionList)
 
 	-- Resolve nil => auto-select best goal module
 	if not goalOrDesired then
-		local selected = PZNS_GOAPGoals.selectBest(npcSurvivor)
+		local selected = M.selectBest(npcSurvivor)
 		if not selected then
 			print("PZNS_GOAPPlanner: no valid goal found for NPC")
 			return nil
@@ -204,12 +204,32 @@ function PZNS_GOAPPlanner.planForNPC(npcSurvivor, goalOrDesired, actionList)
 		desired = goalOrDesired
 	end
 
+	-- debug
+	print("===== WORLDSTATE DEBUG =====")
+	for key, value in pairs(ws) do
+		print("  " .. key .. " = " .. tostring(value))
+	end
+	print("=============================")
+	print("===== DESIRED DEBUG =====")
+	for key, value in pairs(desired) do
+		print("  " .. key .. " = " .. tostring(value))
+	end
+	print("=============================")
+	print("===== USEDACTIONS DEBUG =====")
+	if usedActions then
+		for i, action in ipairs(usedActions) do
+			print("  [" .. i .. "] " .. (action.name or "unnamed action"))
+		end
+	else
+		print("  NO PLAN FOUND")
+	end
+	print("=============================")
+
 	-- debug: list desired keys
 	for k, v in pairs(desired) do
 		print("PZNS_GOAPPlanner: desired ->", k, v)
 	end
-
-	return PZNS_GOAPPlanner.startPlan(ws, desired, usedActions)
+	return PZNS_GOAPPlanner.plan(ws, desired, usedActions)
 end
 return PZNS_GOAPPlanner
 <<<<<<< HEAD

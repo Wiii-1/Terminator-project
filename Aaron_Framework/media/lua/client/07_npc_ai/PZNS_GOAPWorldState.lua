@@ -12,6 +12,7 @@ local PZNS_GOAPWorldState = {}
 >>>>>>> e038117 (Merge conflict and git test)
 local function defaults()
 	return {
+<<<<<<< HEAD
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
 =======
 local function defaults()
@@ -24,12 +25,14 @@ local function defaults()
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
 >>>>>>> 9f85c23 (world state and JobTerminator)
 		isTargetInAttackRange = false,
+=======
+		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint,
+>>>>>>> 53ddd19 (Change AI)
 		isTargetInFollowRange = false,
+		isTargetInAttackRange = false,
 		isHealthLow = false,
 		isAmmoLow = false,
 		isWeaponEquipped = false,
-		isUnderAttack = false,
-		isAtPatrolPoint = false,
 		isTargetDead = false,
 	}
 <<<<<<< HEAD
@@ -49,8 +52,6 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 	local worldState = defaults()
 	local heavyScan = options.heavyScan or false
 	local targetID = "Player" .. tostring(0)
-
-	print(targetID)
 
 	-- NPC
 	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
@@ -73,9 +74,12 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		return worldState
 	end
 
+	if targetIsoPlayer:isAlive() == false then
+		worldState.isTargetDead = true
+	end
+
 	-- Distace between NPC and target
 	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
-	print(distanceFromTarget)
 	if distanceFromTarget <= TerminatorFollowRange then
 		worldState.isTargetInFollowRange = true
 	end
@@ -89,22 +93,26 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 	if handItem == nil then
 		return worldState
 	end
-
 	worldState.isWeaponEquipped = handItem:IsWeapon()
-	-- Ammo
+
+	-- Ammo and Attack range
 	local ammoCount
-	if not handItem:isRanged() and not handItem:IsWeapon() then
-		return worldState
-	else
+	if handItem:isRanged() and handItem:IsWeapon() then
+		if distanceFromTarget < handItem:getMaxRange() then
+			worldState.isTargetInAttackRange = true
+		end
+
 		local npc_inventory = npcIsoPlayer:getInventory()
 		local ammoType = handItem:getAmmoType()
 		local currentAmmo = handItem:getCurrentAmmoCount()
 		local bullet = npc_inventory:getItemCount(ammoType)
 		ammoCount = bullet + currentAmmo
-	end
 
-	if ammoCount <= 5 then
-		worldState.isAmmoLow = true
+		if ammoCount <= 5 then
+			worldState.isAmmoLow = true
+		end
+	else
+		return worldState
 	end
 
 	-- Health
