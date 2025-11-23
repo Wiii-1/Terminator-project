@@ -5,14 +5,12 @@ local PZNS_GOAPWorldState = {}
 
 local function defaults()
 	return {
-		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
-		isTargetInAttackRange = false,
+		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint,
 		isTargetInFollowRange = false,
+		isTargetInAttackRange = false,
 		isHealthLow = false,
 		isAmmoLow = false,
 		isWeaponEquipped = false,
-		isUnderAttack = false,
-		isAtPatrolPoint = false,
 		isTargetDead = false,
 	}
 end
@@ -27,8 +25,6 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 	local worldState = defaults()
 	local heavyScan = options.heavyScan or false
 	local targetID = "Player" .. tostring(0)
-
-	print(targetID)
 
 	-- NPC
 	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
@@ -51,9 +47,12 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		return worldState
 	end
 
+	if targetIsoPlayer:isAlive() == false then
+		worldState.isTargetDead = true
+	end
+
 	-- Distace between NPC and target
 	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
-	print(distanceFromTarget)
 	if distanceFromTarget <= TerminatorFollowRange then
 		worldState.isTargetInFollowRange = true
 	end
@@ -67,22 +66,26 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 	if handItem == nil then
 		return worldState
 	end
-
 	worldState.isWeaponEquipped = handItem:IsWeapon()
-	-- Ammo
+
+	-- Ammo and Attack range
 	local ammoCount
-	if not handItem:isRanged() and not handItem:IsWeapon() then
-		return worldState
-	else
+	if handItem:isRanged() and handItem:IsWeapon() then
+		if distanceFromTarget < handItem:getMaxRange() then
+			worldState.isTargetInAttackRange = true
+		end
+
 		local npc_inventory = npcIsoPlayer:getInventory()
 		local ammoType = handItem:getAmmoType()
 		local currentAmmo = handItem:getCurrentAmmoCount()
 		local bullet = npc_inventory:getItemCount(ammoType)
 		ammoCount = bullet + currentAmmo
-	end
 
-	if ammoCount <= 5 then
-		worldState.isAmmoLow = true
+		if ammoCount <= 5 then
+			worldState.isAmmoLow = true
+		end
+	else
+		return worldState
 	end
 
 	-- Health
