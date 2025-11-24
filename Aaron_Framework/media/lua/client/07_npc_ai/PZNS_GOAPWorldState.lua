@@ -13,6 +13,7 @@ local PZNS_GOAPWorldState = {}
 local function defaults()
 	return {
 <<<<<<< HEAD
+<<<<<<< HEAD
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint
 =======
 local function defaults()
@@ -28,12 +29,40 @@ local function defaults()
 =======
 		isTargetVisible = false, -- di ko ininclude yung isTargetInAttackRange, isUnderAttack at isAtPatrolPoint,
 >>>>>>> 53ddd19 (Change AI)
+=======
+		-- Player / NPC related
+		isTargetVisible = false,
+>>>>>>> d6df736 (Reload Action Added)
 		isTargetInFollowRange = false,
 		isTargetInAttackRange = false,
 		isHealthLow = false,
-		isAmmoLow = false,
-		isWeaponEquipped = false,
 		isTargetDead = false,
+
+		-- Location stuff
+		isScavengeLocationAvailable = false,
+		isRunToLocationAvailable = false,
+		isWalkToLocationAvailable = false,
+		hasReachedRunToLocation = false,
+		hasReachedWalkToLocation = false,
+
+		-- Weapon related
+		handItem = "",
+		ammoCount = 0,
+		isWeaponRanged = false,
+		isWeaponEquipped = false,
+		hasWeapon = false,
+		hasAmmoInChamber = false,
+		hasWeaponAimed = false,
+
+		-- Not sure
+		hasWeaponPickedUp = false,
+		hasScavengedItems = false,
+
+		-- Add to PZNS_GOAP_WorldState
+		-- isWeaponRanged
+		-- handItem
+		-- ammoCount - change isAmmoLow to ammoCount
+		--
 	}
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -88,12 +117,24 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		worldState.isTargetVisible = true
 	end
 
+	-- Inventory
+	local inv = npcIsoPlayer:getInventory()
+	local items = inv:getItems()
+
+	for i = 1, items:size() - 1 do
+		local item = items:get(i)
+		if item:IsWeapon() then
+			worldState.hasWeapon = true
+		end
+	end
 	-- Primary
 	local handItem = npcIsoPlayer:getPrimaryHandItem()
 	if handItem == nil then
 		return worldState
 	end
+	worldState.handItem = handItem
 	worldState.isWeaponEquipped = handItem:IsWeapon()
+	worldState.isWeaponRanged = handItem:isRanged()
 
 	-- Ammo and Attack range
 	local ammoCount
@@ -108,11 +149,17 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 		local bullet = npc_inventory:getItemCount(ammoType)
 		ammoCount = bullet + currentAmmo
 
-		if ammoCount <= 5 then
-			worldState.isAmmoLow = true
+		worldState.ammoCount = ammoCount
+
+		if currentAmmo < 0 then
+			worldState.hasAmmoInChamber = true
 		end
 	else
 		return worldState
+	end
+
+	if npcIsoPlayer:NPCGetAiming() == true then
+		worldState.hasWeaponAimed = true
 	end
 
 	-- Health
@@ -123,6 +170,7 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
 end
 
 return PZNS_GOAPWorldState
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -237,3 +285,5 @@ return PZNS_GOAPWorldState
 =======
 
 >>>>>>> 2cb879a (fixed WorldState)
+=======
+>>>>>>> d6df736 (Reload Action Added)
