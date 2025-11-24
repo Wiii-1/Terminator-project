@@ -34,27 +34,6 @@ end
 --- @param npcSurvivor PZNS_NPCSurvivor
 --- @param targetID string
 function PZNS_JobTerminator(npcSurvivor, targetID)
-	-- NPC validations
-	if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false then
-		return
-	end
-	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
-	if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
-		npcSurvivor.followTargetID = targetID
-	end
-
-	if not targetID or targetID == "" then
-		print(string.format("Invalid targetID (%s) for Terminator job", targetID))
-		-- optional existing calls left intact
-		PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Wander In Cell")
-		return
-	end
-	-- Player validations
-	local targetIsoPlayer = getTargetIsoPlayerByID(targetID)
-	if targetIsoPlayer == nil then
-		return
-	end
-
 	-- Build GOAP worldstate and request plan (auto-select best goal)
 	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = true })
 	if not ws then
