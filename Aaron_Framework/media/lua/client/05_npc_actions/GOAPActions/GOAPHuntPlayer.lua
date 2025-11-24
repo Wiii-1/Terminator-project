@@ -81,47 +81,7 @@ function GOAPHuntPlayer:perform(npcSurvivor, targetID, delta)
     if distanceToTarget > 5 then
         PZNS_RunTo.execute(npcSurvivor, tx, ty, tz)
     else
-        -- prefer a provided wrapper, fall back to known function names, then create a timed action
-        if PZNS_WalkTo.execute then
-            PZNS_WalkTo.execute(npcSurvivor, tx, ty, tz)
-        elseif type(PZNS_WalkTo.PZNS_WalkToSquareXYZ) == "function" then
-            PZNS_WalkTo.PZNS_WalkToSquareXYZ(npcSurvivor, tx, ty, tz)
-        elseif type(PZNS_WalkToSquareXYZ) == "function" then
-            PZNS_WalkToSquareXYZ(npcSurvivor, tx, ty, tz)
-        else
-            local targetSquare = getCell():getGridSquare(tx, ty, tz)
-            if targetSquare then
-                -- mark walk target so worldstate can see it
-                npcSurvivor.walkToX = tx
-                npcSurvivor.walkToY = ty
-                npcSurvivor.walkToZ = tz
-
-                local walkAction = ISWalkToTimedAction:new(npcIsoPlayer, targetSquare)
-                walkAction.npcSurvivor = npcSurvivor
-
-                -- clear markers on completion / abort
-                local oldPerform = walkAction.perform
-                function walkAction:perform(...)
-                    if oldPerform then oldPerform(self, ...) end
-                    if self.npcSurvivor then
-                        self.npcSurvivor.walkToX = nil
-                        self.npcSurvivor.walkToY = nil
-                        self.npcSurvivor.walkToZ = nil
-                    end
-                end
-                local oldStop = walkAction.stop
-                function walkAction:stop(...)
-                    if oldStop then oldStop(self, ...) end
-                    if self.npcSurvivor then
-                        self.npcSurvivor.walkToX = nil
-                        self.npcSurvivor.walkToY = nil
-                        self.npcSurvivor.walkToZ = nil
-                    end
-                end
-
-                PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction)
-            end
-        end
+        PZNS_WalkTo.execute(npcSurvivor, tx, ty, tz)
     end
 
     -- complete when reached
