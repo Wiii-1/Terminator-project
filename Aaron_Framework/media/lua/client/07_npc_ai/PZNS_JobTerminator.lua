@@ -1227,6 +1227,5 @@ return PZNS_JobTerminator
 =======
 	-- plan completed -> NPC achieved goal; you may reset job or choose next behavior
 end
-
 return PZNS_JobTerminator
 >>>>>>> c65b64a (hays git rebase)
