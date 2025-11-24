@@ -1,5 +1,5 @@
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
-local PZNS_WeaponReload = require("02_mod_utils/PZNS_WeaponReload") 
+local PZNS_WeaponReload = require("05_npc_actions/PZNS_WeaponReload") 
 
 local PZNS_GOAPWeaponReload = {}
 PZNS_GOAPWeaponReload.name = "PZNS_GOAP_Weapon_Reload"
