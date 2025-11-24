@@ -133,6 +133,7 @@ end
 --- @param npcSurvivor PZNS_NPCSurvivor
 --- @param targetID string
 function PZNS_JobTerminator(npcSurvivor, targetID)
+<<<<<<< HEAD
 	-- NPC validations
 	if PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false then
 		return
@@ -1112,6 +1113,8 @@ local function PZNS_JobTerminator(npcSurvivor)
 		return
 	end
 
+=======
+>>>>>>> d6df736 (Reload Action Added)
 	-- Build GOAP worldstate and request plan (auto-select best goal)
 	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = true })
 	if not ws then
