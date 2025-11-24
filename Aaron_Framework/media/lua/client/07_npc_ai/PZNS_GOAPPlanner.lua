@@ -141,7 +141,7 @@ function PZNS_GOAPPlanner.plan(worldState, goal, actionList)
 	local open = {}
 	local closed = {}
 	local iterationCount = 0
-	local maxIterations = 1000 -- Safety limit
+	local maxIterations = 300 -- Safety limit
 
 	table.insert(open, {
 		state = local_copyState(worldState),
