@@ -10,17 +10,17 @@ function GOAP_WeaponRangedAttack.isValid(npcSurvivor)
 end
 
 function GOAP_WeaponRangedAttack.get_Cost()
-	return 4
+	return 7
 end
 
 function GOAP_WeaponRangedAttack.get_preconditions()
 	return {
-		hasWeaponEquipped = true,
-		isWeaponRanged = true,
-		isWeaponAimed = true,
-		hasAmmoInChamber = true,
-		isTargetVisible = true,
-		isTargetInAttackRange = true,
+		isWeaponEquipped = true, --
+		isWeaponRanged = true, --
+		isWeaponAimed = true, -- Needs isWeaponAimed
+		hasAmmoInChamber = true, -- Needs Reload
+		isTargetVisible = true, -- Needs huntplayer
+		isTargetInAttackRange = true, -- Nees huntPlayer
 	}
 end
 

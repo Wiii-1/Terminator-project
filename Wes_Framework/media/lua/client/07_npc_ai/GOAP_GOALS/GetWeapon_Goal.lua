@@ -14,7 +14,7 @@ function GetWeapon_Goal.getDesiredState()
 end
 
 function GetWeapon_Goal.priority()
-	return 20
+	return 5
 end
 
 return GetWeapon_Goal
