@@ -1,4 +1,5 @@
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
+local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 
 local GOAPHuntPlayer = require("05_npc_actions/GOAP_Actions/GOAPHuntPlayer")
 local PZNS_GOAP_WeaponAiming = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming")
@@ -26,8 +27,8 @@ local function executeAction(npc, act, ws)
 	end
 
 	-- fallback: apply effects directly to worldstate (instant)
-	if type(act.effects) == "table" then
-		for k, v in pairs(act.effects) do
+	if type(act.get_effects()) == "table" then
+		for k, v in pairs(act.get_effects()) do
 			ws[k] = v
 		end
 		return true
@@ -39,6 +40,8 @@ end
 --- @param npcSurvivor PZNS_NPCSurvivor
 --- @param targetID string
 function PZNS_JobTerminator(npcSurvivor, targetID)
+	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
+
 	-- Build GOAP worldstate and request plan (auto-select best goal)
 	-- if TICK == 0 then
 	-- 	PZNS_GOAP_WeaponReload.perform(npcSurvivor)
@@ -53,7 +56,7 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 
 	-- PZNS_WeaponAiming.PZNS_WeaponAiming(npcSurvivor)
 
-	local plan = PZNS_GOAPPlanner.planForNPC(npcSurvivor)
+	local plan = PZNS_GOAPPlanner.planForNPC(ws)
 	if not plan then
 		print("No plan :(( ")
 		return
@@ -67,8 +70,8 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 			return -- stop and let next tick replan
 		end
 		-- update worldstate after successful action (many actions already modify world state)
-		if type(act.effects) == "table" then
-			for k, v in pairs(act.effects) do
+		if type(act.get_effects()) == "table" then
+			for k, v in pairs(act.get_effects()) do
 				ws[k] = v
 			end
 		end

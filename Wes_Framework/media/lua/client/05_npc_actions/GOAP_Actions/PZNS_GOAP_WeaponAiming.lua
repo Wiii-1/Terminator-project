@@ -10,17 +10,16 @@ function GOAP_WeaponAiming.isValid(npcSurvivor)
 end
 
 function GOAP_WeaponAiming.get_Cost()
-	return 6
+	return 5
 end
 
 function GOAP_WeaponAiming.get_preconditions()
 	return {
-		hasWeaponEquipped = true,
+		isWeaponEquipped = true, --
 		isWeaponRanged = true,
-		hasAmmoInChamber = true,
-		isTargetVisible = true,
-		isWeaponAimed = false,
-		isTargetInAttackRange = true,
+		isTargetVisible = true, -- Nees huntPlayer
+		isWeaponAimed = false, -- precondition
+		isTargetInAttackRange = true, -- ws
 	}
 end
 

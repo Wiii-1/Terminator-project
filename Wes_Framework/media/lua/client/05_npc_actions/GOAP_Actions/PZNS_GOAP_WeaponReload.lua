@@ -11,14 +11,14 @@ function GOAP_WeaponReload.isValid()
 end
 
 function GOAP_WeaponReload.get_Cost()
-	return 7
+	return 3
 end
 
 function GOAP_WeaponReload.get_preconditions()
 	return {
-		hasWeaponEquipped = true,
+		isWeaponEquipped = true, --
 		isWeaponRanged = true,
-		hasAmmoInChamber = false,
+		hasAmmoInChamber = false, -- action starter
 	}
 end
 

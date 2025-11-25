@@ -52,7 +52,7 @@ local function defaults()
 		isWeaponEquipped = false,
 		hasWeapon = false,
 		hasAmmoInChamber = false,
-		hasWeaponAimed = false,
+		isWeaponAimed = false,
 
 		-- Not sure
 		hasWeaponPickedUp = false,
