@@ -3,17 +3,9 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 local actions = {
-	require("05_npc_actions/PZNS_GOAPGunMagazine"),
-	require("05_npc_actions/PZNS_GOAPHuntPlayer"),
-	require("05_npc_actions/PZNS_GOAPPickUpWeapon"),
-	require("05_npc_actions/PZNS_GOAPRunTo"),
-	require("05_npc_actions/PZNS_GOAPScavenge"),
-	require("05_npc_actions/PZNS_GOAPSwitchWeapon"),
-	require("05_npc_actions/PZNS_GOAPWalkTo"),
-	require("05_npc_actions/PZNS_GOAPWeaponAiming"),
-	require("05_npc_actions/PZNS_GOAPWeaponAttack"),
-	require("05_npc_actions/PZNS_GOAPWeaponEquip"),
-	require("05_npc_actions/PZNS_GOAPWeaponReload"),
+	require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Hunt_Player"),
+	require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Walk_to"),
+	require("05_npc_actions/GOAP_Actions/PZNS_GOAPWeaponReload"),
 }
 
 local PZNS_Goal = require("07_npc_ai/PZNS_Goal")
