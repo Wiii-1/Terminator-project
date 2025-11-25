@@ -1,13 +1,10 @@
+local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
+
 local actions = {
 	require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming"),
 	require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponRangedAttack"),
 	require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponReload"),
 }
-
-local PZNS_Goal = require("07_npc_ai/PZNS_Goal")
-local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
-
-local PZNS_GOAPPlanner = {}
 
 local goals = {
 	-- require each goal module you have here
@@ -16,28 +13,18 @@ local goals = {
 	-- add more goal modules as you create them
 }
 
+local PZNS_GOAPPlanner = {}
 local M = {}
 
-function M.getGoals()
-	return goals
-end
-
-function M.geValidGoals()
-	local validGoals = {}
-	for _, goal in ipairs(goals) do
-		if goal.isValid() then
-			table.insert(validGoals, goal)
-		end
-	end
-	return validGoals
-end
-
-function M.selectBest(npc)
+---@param worldState ws
+---@return table goal
+---
+function M.selectBest(ws)
 	local selectBestGoal = nil
 	local highestPriority = -math.huge
 	for _, goal in ipairs(goals) do
-		if goal.isValid(npc) then
-			local priority = goal.priority(npc)
+		if goal.isValid(ws) then
+			local priority = goal.priority()
 			if priority > highestPriority then
 				highestPriority = priority
 				selectBestGoal = goal
@@ -153,48 +140,18 @@ function PZNS_GOAPPlanner.plan(worldState, goal)
 	end
 end
 
--- NOTE: remove elseif and improve error handling on nil goalOrDesired
-
 -- convenience: build world state snapshot for npc and plan
 -- also get the best goal
 function PZNS_GOAPPlanner.planForNPC(npcSurvivor)
-	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = false })
+	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
 	if not ws then
 		print("PZNS_GOAPPlanner: failed to build world state")
 		return nil
 	end
 
 	local desired = nil
-	local selected = M.selectBest(npcSurvivor)
+	local selected = M.selectBest(ws)
 	desired = selected.getDesiredState()
-
-	-- -- Resolve nil => auto-select best goal module
-	-- if not desired == nil then
-	-- 	local selected = M.selectBest(npcSurvivor)
-	-- 	if not selected then
-	-- 		print("PZNS_GOAPPlanner: no valid goal found for NPC")
-	-- 		return nil
-	-- 	end
-	-- 	if type(selected.getDesiredState) ~= "function" then
-	-- 		print("PZNS_GOAPPlanner: selected goal missing getDesiredState()")
-	-- 		return nil
-	-- 	end
-	-- 	local ok, ds = pcall(selected.getDesiredState, npcSurvivor)
-	-- 	if not ok or type(ds) ~= "table" then
-	-- 		print("PZNS_GOAPPlanner: selected goal.getDesiredState() failed or returned non-table")
-	-- 		return nil
-	-- 	end
-	-- 	desired = ds
-	-- elseif type(goalOrDesired) == "table" and type(goalOrDesired.getDesiredState) == "function" then
-	-- 	local ok, ds = pcall(goalOrDesired.getDesiredState, npcSurvivor)
-	-- 	if not ok or type(ds) ~= "table" then
-	-- 		print("PZNS_GOAPPlanner: provided goal module failed getDesiredState()")
-	-- 		return nil
-	-- 	end
-	-- 	desired = ds
-	-- else
-	-- 	desired = nil
-	-- end
 
 	-- debug: list desired keys
 	for k, v in pairs(desired) do

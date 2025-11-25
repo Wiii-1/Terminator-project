@@ -1,4 +1,3 @@
--- ...existing code...
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local Goal = require("07_npc_ai/PZNS_Goal")
@@ -8,12 +7,7 @@ KillPlayer_Goal.name = "KillPlayer_Goal"
 
 setmetatable(KillPlayer_Goal, { __index = Goal })
 
-function KillPlayer_Goal.isValid(npc)
-	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npc) then
-		return false
-	end
-	local ws = PZNS_GOAPWorldState.buildWorldState(npc, { heavyScan = true })
-	-- valid when player is visible/hostile
+function KillPlayer_Goal.isValid(ws)
 	return ws.isTargetVisible == true
 end
 
