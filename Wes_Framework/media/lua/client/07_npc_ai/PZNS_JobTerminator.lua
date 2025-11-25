@@ -1,16 +1,6 @@
-local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
-local PZNS_GOAPGunMagazine = require("05_npc_actions/PZNS_GOAPGunMagazine")
-local PZNS_GOAPPickUpWeapon = require("05_npc_actions/PZNS_GOAPPickUpWeapon")
-local PZNS_GOAPRunTo = require("05_npc_actions/PZNS_GOAPRunTo")
-local PZNS_GOAPScavenge = require("05_npc_actions/PZNS_GOAPScavenge")
-local PZNS_GOAPSwitchWeapon = require("05_npc_actions/PZNS_GOAPSwitchWeapon")
-local PZNS_GOAPWalkTo = require("05_npc_actions/PZNS_GOAPWalkTo")
-local GOAP_WeaponAttack = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAttack")
-local PZNS_GOAPWeaponEquip = require("05_npc_actions/PZNS_GOAPWeaponEquip")
-local PZNS_GOAP_WeaponReload = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponReload")
-local GOAPHuntPlayer = require("05_npc_actions/GOAP_Actions/GOAPHuntPlayer")
 
+local GOAPHuntPlayer = require("05_npc_actions/GOAP_Actions/GOAPHuntPlayer")
 local PZNS_GOAP_WeaponAiming = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming")
 local PZNS_GOAP_WeaponRangedAttack = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponRangedAttack")
 
@@ -23,7 +13,7 @@ local function executeAction(npc, act, ws)
 	end
 
 	-- prefer asynchronous or coroutine-style action functions if present
-	local runFn = act.perform or act.run or act.execute or act.start
+	local runFn = act.perform
 	if type(runFn) == "function" then
 		local ok, res = pcall(runFn, npc, ws) -- action should handle its own timing/state
 		if ok then
@@ -50,12 +40,6 @@ end
 --- @param targetID string
 function PZNS_JobTerminator(npcSurvivor, targetID)
 	-- Build GOAP worldstate and request plan (auto-select best goal)
-	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = true })
-	if not ws then
-		print("PZNS_JobTerminator: failed to build world state")
-		return
-	end
-
 	-- if TICK == 0 then
 	-- 	PZNS_GOAP_WeaponReload.perform(npcSurvivor)
 	-- 	print("done")
@@ -67,26 +51,10 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 	-- PZNS_GOAP_WeaponAiming.perform(npcSurvivor)
 	-- GOAP_WeaponAiming.perform(npcSurvivor)
 
-	-- print("job done")
-	--
-	-- npcSurvivor.aimTarget = getSpecificPlayer(0)
-	-- if npcSurvivor.aimTarget ~= nil then
-	-- 	-- WIP - Cows: Should add a check to see if enemy is in range...
-	-- 	PZNS_WeaponAiming.PZNS_WeaponAiming(npcSurvivor) -- Cows: Aim before attacking
-	-- else
-	-- 	print("No aim")
-	-- end
-
 	-- PZNS_WeaponAiming.PZNS_WeaponAiming(npcSurvivor)
 
 	local plan = PZNS_GOAPPlanner.planForNPC(npcSurvivor)
 	if not plan then
-		-- no plan found; you can fallback to other behaviors here
-		-- e.g., follow player if in range, wander otherwise
-		-- if isTerminatorInFollowRange(npcIsoPlayer, targetIsoPlayer) then
-		-- continue following (existing follow job/logic)
-		-- PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Follow")
-		-- end
 		print("No plan :(( ")
 		return
 	end

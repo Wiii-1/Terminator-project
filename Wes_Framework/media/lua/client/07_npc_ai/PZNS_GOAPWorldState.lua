@@ -45,10 +45,8 @@ function PZNS_GOAPWorldState.PZNS_CreateWorldState()
 	return worldState
 end
 
-function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, options)
-	options = options or {}
+function PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
 	local worldState = defaults()
-	local heavyScan = options.heavyScan or false
 	local targetID = "Player" .. tostring(0)
 
 	-- NPC
