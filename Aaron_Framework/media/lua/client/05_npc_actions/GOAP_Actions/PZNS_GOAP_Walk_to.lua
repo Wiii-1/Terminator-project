@@ -9,14 +9,10 @@ PZNS_GOAP_Walk_to.name = "PZNS_GOAP_Walk_to";
 setmetatable(PZNS_GOAP_Walk_to, { __index = PZNS_GOAP_Actions });
 
 function PZNS_GOAP_Walk_to:isValid(npc, targetSquare)
-    local npcIsoPlayer = npcSuvivor.npcIsoPlayerObject
-    local ws = PZNS_GOAPWorldState.buildWorldState(npc, { heavyScan = false })
-    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npc) then return false end
-    if targetSquare == nil then return false end
-    return ws.isTargetInFollowRange and ws.hasReachedWalkToLocation
+    return PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npc) and targetSquare ~= nil;
 end
 
-function PZNS_GOAP_Walk_to:cost(npc, targetSquare)
+function PZNS_GOAP_Walk_to:cost()
     return 1.0;
 end
 
@@ -34,18 +30,45 @@ function PZNS_GOAP_Walk_to:perform(npcSurvivor, targetSquare)
         print("PZNS_GOAP_Walk_to: invalid npcSurvivor")
         return true
     end
+
     local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
-    local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, { heavyScan = true })
-    local TerminatorFollowRange = PZNS_UtilsNPCs.TerminatorFollowRange(npcSurvivor)
-    
-    if ws.distanceFromTarget <= TerminatorFollowRange.walk then
+    if not npcIsoPlayer or not targetSquare then
         return true
-    else
-        npcSurvivor:PZNS_WalkToSquareXYZ(targetSquare:getX(), targetSquare:getY(), targetSquare:getZ())
-        npcSurvivor.currentAction = "Walking"
-        npcSurvivor:NPCSetRunnning(false)
-        local walkAction = ISWalkToTimedAction:new(npcIsoPlayer, targetSquare);
-        PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction);
-        return false
     end
+
+    -- get target coordinates
+    local tx, ty, tz = targetSquare:getX(), targetSquare:getY(), targetSquare:getZ()
+    local px, py = npcIsoPlayer:getX(), npcIsoPlayer:getY()
+
+    local dx, dy = tx - px, ty - py
+    local distance = math.sqrt(dx * dx + dy * dy)
+
+    -- safe follow range lookup (fallback to 20)
+    local followRange = 20
+    if type(PZNS_UtilsNPCs.TerminatorFollowRange) == "function" then
+        local ok, r = pcall(PZNS_UtilsNPCs.TerminatorFollowRange, npcSurvivor)
+        if ok and type(r) == "table" and type(r.walk) == "number" then
+            followRange = r.walk
+        end
+    end
+
+    local reachThreshold = 1.8
+
+    if distance <= math.min(followRange, reachThreshold) then
+        return true
+    end
+
+    -- queue walking action and set NPC state
+    npcSurvivor:PZNS_WalkToSquareXYZ(tx, ty, tz)
+    npcSurvivor.currentAction = "Walking"
+    if type(npcSurvivor.NPCSetRunnning) == "function" then
+        npcSurvivor:NPCSetRunnning(false)
+    end
+
+    local walkAction = ISWalkToTimedAction:new(npcIsoPlayer, targetSquare)
+    if type(PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue) == "function" then
+        PZNS_UtilsNPCs.PZNS_AddNPCActionToQueue(npcSurvivor, walkAction)
+    end
+
+    return false
 end
