@@ -1,7 +1,9 @@
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 
-local GOAPHuntPlayer = require("05_npc_actions/GOAP_Actions/GOAPHuntPlayer")
+
+local PZNS_GOAP_Hunt_Player = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Hunt_Player")
+local PZNS_GOAP_Walk_to = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Walk_to")
 local PZNS_GOAP_WeaponAiming = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming")
 local PZNS_GOAP_WeaponRangedAttack = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponRangedAttack")
 
@@ -42,6 +44,20 @@ end
 function PZNS_JobTerminator(npcSurvivor, targetID)
 	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
 
+	if TICK == 0 then
+		PZNS_GOAP_Hunt_Player.perform(npcSurvivor,targetID, 0)
+		print("done")
+		TICK = TICK + 1
+	end
+
+
+	-- if TICK <= 0 then
+	-- 	PZNS_GOAP_Walk_to.perform(npcSurvivor)
+	-- 	print("done")
+	-- 	TICK = TICK + 1
+	-- end
+
+
 	-- Build GOAP worldstate and request plan (auto-select best goal)
 	-- if TICK == 0 then
 	-- 	PZNS_GOAP_WeaponReload.perform(npcSurvivor)
@@ -56,26 +72,26 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 
 	-- PZNS_WeaponAiming.PZNS_WeaponAiming(npcSurvivor)
 
-	local plan = PZNS_GOAPPlanner.planForNPC(ws)
-	if not plan then
-		print("No plan :(( ")
-		return
-	end
+	-- local plan = PZNS_GOAPPlanner.planForNPC(ws)
+	-- if not plan then
+	-- 	print("No plan :(( ")
+	-- 	return
+	-- end
 
-	-- execute plan steps in order (blocking/synchronous example)
-	for i, act in ipairs(plan) do
-		local success = executeAction(npcSurvivor, act, ws)
-		if not success then
-			print("PZNS_JobTerminator: action failed - will replan next tick")
-			return -- stop and let next tick replan
-		end
-		-- update worldstate after successful action (many actions already modify world state)
-		if type(act.get_effects()) == "table" then
-			for k, v in pairs(act.get_effects()) do
-				ws[k] = v
-			end
-		end
-	end
+	-- -- execute plan steps in order (blocking/synchronous example)
+	-- for i, act in ipairs(plan) do
+	-- 	local success = executeAction(npcSurvivor, act, ws)
+	-- 	if not success then
+	-- 		print("PZNS_JobTerminator: action failed - will replan next tick")
+	-- 		return -- stop and let next tick replan
+	-- 	end
+	-- 	-- update worldstate after successful action (many actions already modify world state)
+	-- 	if type(act.get_effects()) == "table" then
+	-- 		for k, v in pairs(act.get_effects()) do
+	-- 			ws[k] = v
+	-- 		end
+	-- 	end
+	-- end
 
 	-- plan completed -> NPC achieved goal; you may reset job or choose next behavior
 end
