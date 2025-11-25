@@ -3,7 +3,7 @@ local PZNS_GOAP_Actions = require("05_npc_actions/PZNS_GOAP_Actions")
 local PZNS_GOAP_WorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 
 local GOAP_WeaponReload = {}
-GOAP_WeaponReload.name = "WeaponReloaad_Action"
+GOAP_WeaponReload.name = "WeaponReload_Action"
 
 setmetatable(GOAP_WeaponReload, { __index = PZNS_GOAP_Actions })
 
@@ -13,19 +13,18 @@ function GOAP_WeaponReload.isValid(npcSurvivor)
 end
 
 function GOAP_WeaponReload.get_Cost()
-	return 4
+	return 7
 end
 
 function GOAP_WeaponReload.get_preconditions()
 	return {
 		hasWeaponEquipped = true,
 		isWeaponRanged = true,
-		isAmmoLow = false,
 		hasAmmoInChamber = false,
 	}
 end
 
-function GOAP_WeaponReload.get_efffects()
+function GOAP_WeaponReload.get_effects()
 	return { hasAmmoInChamber = true }
 end
 
