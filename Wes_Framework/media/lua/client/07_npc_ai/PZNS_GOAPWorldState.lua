@@ -1,12 +1,6 @@
 local PZNS_WorldUtils = require("02_mod_utils/PZNS_WorldUtils")
 local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 
--- distance thresholds (tweak to taste)
-local TerminatorFollowRange = 30      -- tiles within which NPC will follow target
-local WalkStopRange = 1.5               -- tiles considered "reached" when walking
-local RunThresholdDistance = 20         -- tiles above which NPC should run instead of walk
-local WORLDSTATE_COOLDOWN = 0.25    -- seconds between rebuilds per NPC (tweak)
-
 local PZNS_GOAPWorldState = {}
 
 local function defaults()
@@ -19,16 +13,11 @@ local function defaults()
 		isTargetDead = false,
 
 		-- Location stuff
-		isRunToLocationAvailable = false,
+		distanceFromTarget = 0,
 		isWalkToLocationAvailable = false,
-		hasReachedRunToLocation = false,
-		hasReachedWalkToLocation = false,
-
-        -- target position (filled at runtime)
-        targetX = nil,
-        targetY = nil,
-        targetZ = nil,
-        distanceFromTarget = nil,
+		targetX = 0,
+		targetY = 0,
+		targetZ = 0,
 
 		-- Weapon related
 		handItem = "",
@@ -51,30 +40,48 @@ local function defaults()
 	}
 end
 
-function PZNS_GOAPWorldState.PZNS_CreateWorldState()
+function PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
 	local worldState = defaults()
-	return worldState
-end
+	local targetID = "Player" .. tostring(0)
 
-function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
-    if not npcSurvivor then
-        return defaults()
-    end
+	-- NPC
+	if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+		return worldState
+	end
+	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
 
+<<<<<<< HEAD
     -- get current time (fallback if os.clock missing)
     local now = (os and os.clock and os.clock()) or ((socket and socket.gettime and socket.gettime()) or 0)
+=======
+	-- Target
+	if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
+		npcSurvivor.followTargetID = targetID
+	end
+	if not targetID or targetID == "" then
+		print(string.format("Invalid targetID (%s) for Terminator", targetID))
+		return worldState
+	end
 
-    -- per-NPC cache slot (choose a unique name to avoid collisions)
-    local cache = npcSurvivor._PZNS_cachedWorldState
-    if cache and cache._PZNS_lastTime and (now - cache._PZNS_lastTime) < WORLDSTATE_COOLDOWN and cache._PZNS_targetID == targetID then
-        return cache
-    end
+	local targetIsoPlayer = getSpecificPlayer(0)
+>>>>>>> c7a116e (final struggle)
 
-    local worldState = defaults()
+	if targetIsoPlayer == nil then
+		return worldState
+	end
 
-    targetID = targetID or "Player0"
-    print("PZNS_GOAPWorldState.buildWorldState: start targetID=", tostring(targetID), " npcSurvivor=", tostring(npcSurvivor))
+	if targetIsoPlayer:isAlive() == false then
+		worldState.isTargetDead = true
+	end
 
+	-- Distace between NPC and target
+	local distanceFromTarget = PZNS_WorldUtils.PZNS_GetDistanceBetweenTwoObjects(npcIsoPlayer, targetIsoPlayer)
+	worldState.distanceFromtarget = distanceFromTarget
+	if distanceFromTarget <= TerminatorFollowRange then
+		worldState.isTargetInFollowRange = true
+	end
+
+<<<<<<< HEAD
     -- NPC validity
     if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
         return worldState
@@ -142,6 +149,9 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
             worldState.isRunToLocationAvailable = false
         end
     end
+=======
+	worldState.isTargetVisible = npcIsoPlayer:CanSee(targetIsoPlayer)
+>>>>>>> c7a116e (final struggle)
 
 	-- Inventory
 	local inv = npcIsoPlayer:getInventory()
@@ -188,19 +198,18 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 		worldState.isWeaponAimed = true
 	end
 
-    -- target player's current square (if needed by actions)
-    local playerSquare = targetIsoPlayer:getCurrentSquare()
-    worldState.targetSquare = playerSquare
-
 	-- Health
 	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
 		worldState.isHealthLow = true
 	end
 
-    -- stamp and store cache
-    worldState._PZNS_lastTime = now
-    worldState._PZNS_targetID = targetID
-    npcSurvivor._PZNS_cachedWorldState = worldState
+	-- Location Based
+	-- isWalkToLocationAvailable
+	local tx, ty, tz = targetIsoPlayer:getX(), targetIsoPlayer:getY(), targetIsoPlayer:getZ()
+
+	worldState.targetX = tx
+	worldState.targetY = ty
+	worldState.targetZ = tz
 
 	return worldState
 end

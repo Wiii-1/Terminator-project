@@ -49,6 +49,8 @@ function PZNS_SpawnChrisTester(mpPlayerID)
 				PZNS_UtilsNPCs.PZNS_SetLoadedGun(npcSurvivor)
 				PZNS_UtilsNPCs.PZNS_AddItemsToInventoryNPCSurvivor(npcSurvivor, "Base.ShotgunShells", 12)
 				-- Cows: Set the job...
+				npcSurvivor.affection = 0
+				npcSurvivor.canAttack = true
 				PZNS_UtilsNPCs.PZNS_SetNPCJob(npcSurvivor, "Companion")
 				PZNS_UtilsNPCs.PZNS_SetNPCFollowTargetID(npcSurvivor, playerID)
 				-- Cows: Group Assignment
