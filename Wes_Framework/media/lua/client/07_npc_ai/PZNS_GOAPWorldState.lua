@@ -5,6 +5,7 @@ local PZNS_UtilsNPCs = require("02_mod_utils/PZNS_UtilsNPCs")
 local TerminatorFollowRange = 30      -- tiles within which NPC will follow target
 local WalkStopRange = 1.5               -- tiles considered "reached" when walking
 local RunThresholdDistance = 20         -- tiles above which NPC should run instead of walk
+local WORLDSTATE_COOLDOWN = 0.25    -- seconds between rebuilds per NPC (tweak)
 
 local PZNS_GOAPWorldState = {}
 
@@ -56,42 +57,35 @@ function PZNS_GOAPWorldState.PZNS_CreateWorldState()
 end
 
 function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
+    if not npcSurvivor then
+        return defaults()
+    end
+
+
+    -- get current time (fallback if os.clock missing)
+    local now = (os and os.clock and os.clock()) or ((socket and socket.gettime and socket.gettime()) or 0)
+
+    -- per-NPC cache slot (choose a unique name to avoid collisions)
+    local cache = npcSurvivor._PZNS_cachedWorldState
+    if cache and cache._PZNS_lastTime and (now - cache._PZNS_lastTime) < WORLDSTATE_COOLDOWN and cache._PZNS_targetID == targetID then
+        return cache
+    end
+
     local worldState = defaults()
 
     targetID = targetID or "Player0"
     print("PZNS_GOAPWorldState.buildWorldState: start targetID=", tostring(targetID), " npcSurvivor=", tostring(npcSurvivor))
 
      -- NPC
-     if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
-         print("PZNS_GOAPWorldState.buildWorldState: invalid npcSurvivor or missing iso player")
-         return worldState
-     end
-     local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
-     print("PZNS_GOAPWorldState.buildWorldState: npcIsoPlayer=", tostring(npcIsoPlayer))
+    if (PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false) then
+        return;
+    end
+    
+    local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
+    print("PZNS_GOAPWorldState.buildWorldState: npcIsoPlayer=", tostring(npcIsoPlayer))
 
-    -- Target resolution: accept "PlayerN" strings or numeric index; fallback to Player0
-    if targetID ~= "" and targetID ~= npcSurvivor.followTargetID then
-        npcSurvivor.followTargetID = targetID
-    end
-    local targetIsoPlayer
-    if type(targetID) == "string" then
-        local idx = tonumber(targetID:match("Player(%d+)"))
-        print("PZNS_GOAPWorldState: parsed target index=", tostring(idx))
-        if idx then targetIsoPlayer = getSpecificPlayer(idx) end
-    elseif type(targetID) == "number" then
-        targetIsoPlayer = getSpecificPlayer(targetID)
-    end
-    if not targetIsoPlayer then
-        print("PZNS_GOAPWorldState: falling back to getSpecificPlayer(0)")
-        targetIsoPlayer = getSpecificPlayer(0)
-    end
-    if not targetIsoPlayer then
-        print("PZNS_GOAPWorldState: no targetIsoPlayer resolved, returning defaults")
-        return worldState
-    end
-    print("PZNS_GOAPWorldState: resolved targetIsoPlayer=", tostring(targetIsoPlayer))
     -- expose resolved IsoPlayer for callers
-    worldState.targetIsoPlayer = targetIsoPlayer
+    worldState.targetIsoPlayer = npcSurvivor.npcIsoPlayerObject
 
     -- basic alive check
     if targetIsoPlayer:isAlive() == false then
@@ -127,7 +121,6 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
     end
 
 	
-
     -- decide run vs walk availability
     -- hasReachedWalkToLocation: close enough to stop walking
     if distanceFromTarget <= WalkStopRange then
@@ -199,6 +192,12 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
 	if npcIsoPlayer:getBodyDamage():getOverallBodyHealth() <= 30 then
 		worldState.isHealthLow = true
 	end
+
+    -- stamp and store cache
+    worldState._PZNS_lastTime = now
+    worldState._PZNS_targetID = targetID
+    npcSurvivor._PZNS_cachedWorldState = worldState
+
 	return worldState
 end
 
