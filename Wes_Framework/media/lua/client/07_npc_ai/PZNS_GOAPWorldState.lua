@@ -61,7 +61,6 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
         return defaults()
     end
 
-
     -- get current time (fallback if os.clock missing)
     local now = (os and os.clock and os.clock()) or ((socket and socket.gettime and socket.gettime()) or 0)
 
@@ -76,27 +75,32 @@ function PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
     targetID = targetID or "Player0"
     print("PZNS_GOAPWorldState.buildWorldState: start targetID=", tostring(targetID), " npcSurvivor=", tostring(npcSurvivor))
 
-     -- NPC
-    if (PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) == false) then
-        return;
+    -- NPC validity
+    if not PZNS_UtilsNPCs.IsNPCSurvivorIsoPlayerValid(npcSurvivor) then
+        return worldState
     end
-    
     local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
     print("PZNS_GOAPWorldState.buildWorldState: npcIsoPlayer=", tostring(npcIsoPlayer))
 
-    -- expose resolved IsoPlayer for callers
-    worldState.targetIsoPlayer = npcSurvivor.npcIsoPlayerObject
-
-    -- basic alive check
-    if targetIsoPlayer:isAlive() == false then
-        worldState.isTargetDead = true
+    -- resolve targetIsoPlayer from targetID (accept "PlayerN" or numeric index), fall back to Player0
+    local targetIsoPlayer = nil
+    if type(targetID) == "string" then
+        local idx = tonumber(targetID:match("Player(%d+)"))
+        if idx then targetIsoPlayer = getSpecificPlayer(idx) end
+    elseif type(targetID) == "number" then
+        targetIsoPlayer = getSpecificPlayer(targetID)
     end
-
-    -- target coordinates
+    if not targetIsoPlayer then
+        targetIsoPlayer = getSpecificPlayer(0)
+    end
+    if not targetIsoPlayer then
+        return worldState
+    end
+    -- expose resolved IsoPlayer and coords
+    worldState.targetIsoPlayer = targetIsoPlayer
+    if targetIsoPlayer:isAlive() == false then worldState.isTargetDead = true end
     local tx, ty, tz = targetIsoPlayer:getX(), targetIsoPlayer:getY(), targetIsoPlayer:getZ()
-    worldState.targetX = tx
-    worldState.targetY = ty
-    worldState.targetZ = tz
+    worldState.targetX = tx; worldState.targetY = ty; worldState.targetZ = tz
 
     -- Distance between NPC and target (use utility if available, else fallback)
     local distanceFromTarget = nil
