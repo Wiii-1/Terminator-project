@@ -60,7 +60,7 @@ end
 function GOAP_Hunt_Player:perform(npcSurvivor, targetID)
     print("Perform called, targetID=", tostring(targetID))
     local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
-    if not ws or not ws.targetIsoPlayer then
+    if not ws or not ws.npcSurvivor then
         print("PZNS_GOAP_Hunt_Player: no target resolved")
         return true
     end

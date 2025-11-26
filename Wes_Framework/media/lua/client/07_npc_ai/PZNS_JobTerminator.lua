@@ -45,9 +45,11 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
 
 	if TICK == 0 then
-		PZNS_GOAP_Hunt_Player.perform(npcSurvivor,targetID, 0)
-		print("done")
-		TICK = TICK + 1
+		-- use executeAction so action receives itself as 'self'
+		local ok = executeAction(npcSurvivor, PZNS_GOAP_Hunt_Player, ws, targetID, 0)
+		print("executeAction returned:", tostring(ok))
+         print("done")
+         TICK = TICK + 1
 	end
 
 
