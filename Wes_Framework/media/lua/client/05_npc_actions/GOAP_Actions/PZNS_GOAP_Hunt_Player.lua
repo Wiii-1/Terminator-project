@@ -48,17 +48,6 @@ end
 
 -- PLANNING: pure preconditions/effects (do NOT call buildWorldState here)
 function GOAP_Hunt_Player:getPreconditions()
-<<<<<<< HEAD
-    -- only allow this action to be considered when planner snapshot has player visible
-    return { isTargetVisible = true, isTargetInFollowRange = false, isWalkToLocationAvailable = true }
-end
-
-function GOAP_Hunt_Player:getEffects()
-    -- planner-level effect:a movement target will be a vailable (planner can reason about movement)
-    return { 
-        hasReachedWalkToLocation = true
-    }
-=======
 	-- only allow this action to be considered when planner snapshot has player visible
 	return { isTargetVisible = true }
 end
@@ -71,29 +60,12 @@ function GOAP_Hunt_Player:getEffects()
 		hasReachedRunToLocation = true,
 		hasReachedWalkToLocation = true,
 	}
->>>>>>> c7a116e (final struggle)
 end
 
 -- RUNTIME: perform does live queries and enqueues pathfinding (safe to call buildWorldState / getSpecificPlayer here)
 -- return true when finished, false while moving
-<<<<<<< HEAD
-function GOAP_Hunt_Player:perform(npcSurvivor, targetID)
-    print("Perform called, targetID=", tostring(targetID))
-    -- get (cached) snapshot for this npc + target
-    local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
-    -- if cache returned no target, force one fresh build once (avoid infinite rebuilds)
-    if (not ws) or (not ws.targetIsoPlayer) then
-        npcSurvivor._PZNS_cachedWorldState = nil
-        ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
-    end
-    if not ws or not ws.targetIsoPlayer then
-        print("PZNS_GOAP_Hunt_Player: no target resolved")
-        return true
-    end
-=======
 function GOAP_Hunt_Player.perform(npcSurvivor)
 	local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
->>>>>>> c7a116e (final struggle)
 
 	print("Target visible:", ws.isTargetVisible)
 	print("Target in follow range:", ws.isTargetInFollowRange)
@@ -124,8 +96,4 @@ function GOAP_Hunt_Player.perform(npcSurvivor)
 	-- return true
 end
 
-<<<<<<< HEAD
-return GOAP_Hunt_Player;
-=======
 return GOAP_Hunt_Player
->>>>>>> c7a116e (final struggle)
