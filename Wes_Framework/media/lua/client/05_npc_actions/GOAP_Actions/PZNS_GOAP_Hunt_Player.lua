@@ -42,15 +42,12 @@ end
 -- PLANNING: pure preconditions/effects (do NOT call buildWorldState here)
 function GOAP_Hunt_Player:getPreconditions()
     -- only allow this action to be considered when planner snapshot has player visible
-    return { isTargetVisible = true }
+    return { isTargetVisible = true, isTargetInFollowRange = false, isWalkToLocationAvailable = true }
 end
 
 function GOAP_Hunt_Player:getEffects()
     -- planner-level effect:a movement target will be a vailable (planner can reason about movement)
     return { 
-        isRunToLocationAvailable = true,
-        isWalkToLocationAvailable = true,
-        hasReachedRunToLocation = true,
         hasReachedWalkToLocation = true
     }
 end
@@ -115,6 +112,4 @@ function GOAP_Hunt_Player:perform(npcSurvivor, targetID)
 
 end
 
-
-
-return GOAP_Hunt_Player
+return GOAP_Hunt_Player;
