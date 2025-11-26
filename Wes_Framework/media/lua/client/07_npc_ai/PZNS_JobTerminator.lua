@@ -1,7 +1,6 @@
 local PZNS_GOAPPlanner = require("07_npc_ai/PZNS_GOAPPlanner")
 local PZNS_GOAPWorldState = require("07_npc_ai/PZNS_GOAPWorldState")
 
-
 local PZNS_GOAP_Hunt_Player = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Hunt_Player")
 local PZNS_GOAP_Walk_to = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Walk_to")
 local PZNS_GOAP_WeaponAiming = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming")
@@ -48,17 +47,15 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 		-- use executeAction so action receives itself as 'self'
 		local ok = executeAction(npcSurvivor, PZNS_GOAP_Hunt_Player, ws, targetID, 0)
 		print("executeAction returned:", tostring(ok))
-         print("done")
-         TICK = TICK + 1
+		print("done")
+		TICK = TICK + 1
 	end
-
 
 	-- if TICK <= 0 then
 	-- 	PZNS_GOAP_Walk_to.perform(npcSurvivor)
 	-- 	print("done")
 	-- 	TICK = TICK + 1
 	-- end
-
 
 	-- Build GOAP worldstate and request plan (auto-select best goal)
 	-- if TICK == 0 then
