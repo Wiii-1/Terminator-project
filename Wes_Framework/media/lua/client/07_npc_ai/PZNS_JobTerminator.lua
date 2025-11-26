@@ -6,7 +6,15 @@ local PZNS_GOAP_Walk_to = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_Walk_to
 local PZNS_GOAP_WeaponAiming = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponAiming")
 local PZNS_GOAP_WeaponRangedAttack = require("05_npc_actions/GOAP_Actions/PZNS_GOAP_WeaponRangedAttack")
 
+<<<<<<< HEAD
 local PZNS_JobTerminator = {}
+=======
+local function tick()
+	return { plan = true }
+end
+
+TICK = tick()
+>>>>>>> c7a116e (final struggle)
 
 local PLAN_COOLDOWN = 0.5      -- seconds between replans when no stored plan
 local JOBTERMINATOR_COOLDOWN = 0.15 -- seconds between JobTerminator runs per NPC
@@ -19,6 +27,7 @@ local function executeAction(npc, act, ws)
         return false, false
     end
 
+<<<<<<< HEAD
     -- prefer method-style perform (act:perform)
     local runFn = act.perform
     if type(runFn) == "function" then
@@ -46,6 +55,29 @@ local function executeAction(npc, act, ws)
             return true, false
         end
     end
+=======
+	-- prefer asynchronous or coroutine-style action functions if present
+	local runFn = act.perform(npc)
+	if type(runFn) == "function" then
+		local ok, res = pcall(runFn, npc, ws) -- action should handle its own timing/state
+		if ok then
+			-- action claims success (true) or failure (false) or nil -> assume success
+			return res ~= false
+		else
+			print("PZNS_JobTerminator: action error:", tostring(res))
+			return false
+		end
+	end
+
+	TICK.plan = true
+	-- fallback: apply effects directly to worldstate (instant)
+	if type(act.get_effects()) == "table" then
+		for k, v in pairs(act.get_effects()) do
+			ws[k] = v
+		end
+		return true
+	end
+>>>>>>> c7a116e (final struggle)
 
     return false, false
 end
@@ -54,6 +86,7 @@ end
 --- @param npcSurvivor table
 --- @param targetID string|nil
 function PZNS_JobTerminator(npcSurvivor, targetID)
+<<<<<<< HEAD
     if not npcSurvivor then return end
 
     -- per-NPC throttle to avoid tight loops
@@ -66,6 +99,49 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
 
     -- build (cached) worldstate for this npc (pass targetID through if desired)
     local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
+=======
+	if TICK.plan == true then
+		local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
+		local plan = PZNS_GOAPPlanner.planForNPC(ws)
+		if not plan then
+			print("no Plan ")
+			return true
+		else
+			print("Plan done")
+			TICK.plan = false
+		end
+
+		for i, act in ipairs(plan) do
+			local success = executeAction(npcSurvivor, act, ws)
+			if not success then
+				print("PZNS_JobTerminator: action failed - will replan next tick")
+				return -- stop and let next tick replan
+			end
+			-- update worldstate after successful action (many actions already modify world state)
+			if type(act.get_effects()) == "table" then
+				for k, v in pairs(act.get_effects()) do
+					ws[k] = v
+				end
+			end
+		end
+	end
+
+	-- local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor)
+	--
+	-- if TICK == 0 then
+	-- 	-- use executeAction so action receives itself as 'self'
+	-- 	PZNS_GOAP_Hunt_Player.perform(npcSurvivor)
+	-- 	print("done")
+	-- 	TICK = TICK + 1
+	-- end
+	--
+
+	-- if TICK <= 0 then
+	-- 	PZNS_GOAP_Walk_to.perform(npcSurvivor)
+	-- 	print("done")
+	-- 	TICK = TICK + 1
+	-- end
+>>>>>>> c7a116e (final struggle)
 
     -- ensure per-npc plan state
     local plan = npcSurvivor._PZNS_currentPlan
@@ -79,6 +155,7 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
             return
         end
 
+<<<<<<< HEAD
         local newPlan = PZNS_GOAPPlanner.planForNPC(ws)
         npcSurvivor._PZNS_planLastTime = cur
         if not newPlan or #newPlan == 0 then
@@ -140,6 +217,17 @@ function PZNS_JobTerminator(npcSurvivor, targetID)
             end
         end
     end
+=======
+	-- local plan = PZNS_GOAPPlanner.planForNPC(ws)
+	-- if not plan then
+	-- 	print("No plan :(( ")
+	-- 	return
+	-- end
+	-- execute plan steps in order (blocking/synchronous example)
+
+	--
+	-- plan completed -> NPC achieved goal; you may reset job or choose next behavior
+>>>>>>> c7a116e (final struggle)
 end
 
 return PZNS_JobTerminator;

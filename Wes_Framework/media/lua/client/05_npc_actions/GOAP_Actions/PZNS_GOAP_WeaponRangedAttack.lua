@@ -1,4 +1,6 @@
 local PZNS_GOAP_Actions = require("05_npc_actions/PZNS_GOAP_Actions")
+local PZNS_WeaponAttack = require("05_npc_actions/PZNS_WeaponAttack")
+local PZNS_GeneralAI = require("07_npc_ai/PZNS_GeneralAI")
 
 local GOAP_WeaponRangedAttack = {}
 GOAP_WeaponRangedAttack.name = "WeaponRangedAttack_Action"
@@ -29,8 +31,8 @@ function GOAP_WeaponRangedAttack.get_effects()
 end
 
 function GOAP_WeaponRangedAttack.perform(npcSurvivor)
-	local npcIsoPlayer = npcSurvivor.npcIsoPlayerObject
-	npcIsoPlayer:NPCSetAttack(true)
+	PZNS_GeneralAI.PZNS_IsNPCBusyCombat(npcSurvivor)
+
 	return true
 end
 
