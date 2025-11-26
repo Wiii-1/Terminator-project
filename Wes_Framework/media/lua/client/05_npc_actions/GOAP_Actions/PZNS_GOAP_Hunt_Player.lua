@@ -59,8 +59,14 @@ end
 -- return true when finished, false while moving
 function GOAP_Hunt_Player:perform(npcSurvivor, targetID)
     print("Perform called, targetID=", tostring(targetID))
+    -- get (cached) snapshot for this npc + target
     local ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
-    if not ws or not ws.npcSurvivor then
+    -- if cache returned no target, force one fresh build once (avoid infinite rebuilds)
+    if (not ws) or (not ws.targetIsoPlayer) then
+        npcSurvivor._PZNS_cachedWorldState = nil
+        ws = PZNS_GOAPWorldState.buildWorldState(npcSurvivor, targetID)
+    end
+    if not ws or not ws.targetIsoPlayer then
         print("PZNS_GOAP_Hunt_Player: no target resolved")
         return true
     end
